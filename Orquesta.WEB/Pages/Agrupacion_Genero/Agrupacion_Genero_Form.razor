@@ -1,0 +1,83 @@
+﻿@using Orquesta.Shared.Entities
+@using System.ComponentModel.DataAnnotations
+@inject SweetAlertService swal
+
+<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation"></NavigationLock>
+
+<EditForm EditContext="editContext" OnValidSubmit="OnSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label>Agrupacion o Solista</label>
+        <div>
+            <InputNumber class="form-control" @bind-Value="Agrupacion_Genero.AgrupacionId" />
+            <ValidationMessage For="@(() => Agrupacion_Genero.AgrupacionId)" />
+        </div>
+    </div>
+    <div class="mb-3">
+        <label>Género musical</label>
+        <div>
+            <InputNumber class="form-control" @bind-Value="Agrupacion_Genero.GeneroMusicalId" />
+            <ValidationMessage For="@(() => Agrupacion_Genero.GeneroMusicalId)" />
+        </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Guardar</button>
+    <button class="btn btn-info" type="reset">Limpiar</button>
+    <button class="btn btn-success" @onclick="ReturnAction">Regresar</button>
+
+</EditForm>
+
+@code {
+    private EditContext editContext = null;
+    protected override void OnInitialized()
+    {
+        editContext = new(Agrupacion_Genero);
+    }
+
+    [EditorRequired]
+    [Parameter]
+    public Agrupacion_Genero Agrupacion_Genero { get; set; }
+
+    [EditorRequired]
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    [EditorRequired]
+    [Parameter]
+    public EventCallback ReturnAction { get; set; }
+
+    public bool FormPostedSuccessfully { get; set; } = false;
+
+    private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+    {
+        var formularioFueEditado = editContext.IsModified();
+
+        if (!formularioFueEditado)
+        {
+            return;
+        }
+
+        if (FormPostedSuccessfully)
+        {
+            return;
+        }
+
+        var resultado = await swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Deseas abandonar la página y perder los cambios?",
+                Icon = SweetAlertIcon.Warning,
+                ShowCancelButton = true
+            });
+
+        var confirmado = !string.IsNullOrEmpty(resultado.Value);
+
+        if (confirmado)
+        {
+            return;
+        }
+
+        context.PreventNavigation();
+    }
+}

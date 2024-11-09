@@ -1,0 +1,131 @@
+﻿@using Orquesta.Shared.Entities
+@using System.ComponentModel.DataAnnotations
+@inject SweetAlertService swal
+
+<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation"></NavigationLock>
+
+<EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label>Tiempo inicial</label>
+        <div>
+            <InputText type="time" class="form-control" @bind-Value="startTimeString" />
+        </div>
+    </div>
+    <div class="mb-3">
+        <label>Tiempo final</label>
+        <div>
+            <InputText type="time" class="form-control" @bind-Value="finalTimeString" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label>Fecha</label>
+        <div>
+            <InputDate class="form-control" @bind-Value="Reservacion.Fecha" />
+            <ValidationMessage For="@(() => Reservacion.Fecha)" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label>Lugar</label>
+        <div>
+            <InputText class="form-control" @bind-Value="Reservacion.Place" />
+            <ValidationMessage For="@(() => Reservacion.Place)" />
+        </div>
+    </div>
+    <div class="mb-3">
+        <label>Id Contratante</label>
+        <div>
+            <InputNumber class="form-control" @bind-Value="Reservacion.ContratanteId" />
+            <ValidationMessage For="@(() => Reservacion.ContratanteId)" />
+        </div>
+    </div>
+    <div class="mb-3">
+        <label>Id Agrupacion o solista</label>
+        <div>
+            <InputNumber class="form-control" @bind-Value="Reservacion.AgrupacionId" />
+            <ValidationMessage For="@(() => Reservacion.AgrupacionId)" />
+        </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Guardar</button>
+    <button class="btn btn-info" type="reset">Limpiar</button>
+    <button class="btn btn-success" @onclick="ReturnAction">Regresar</button>
+
+</EditForm>
+
+@code {
+    private EditContext editContext;
+    private string startTimeString;
+    private string finalTimeString;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(Reservacion);
+        startTimeString = Reservacion.StartTime.ToString(@"hh\:mm");
+        finalTimeString = Reservacion.FinalTime.ToString(@"hh\:mm");
+    }
+
+    [EditorRequired]
+    [Parameter]
+    public Reservacion Reservacion { get; set; }
+
+    [EditorRequired]
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    [EditorRequired]
+    [Parameter]
+    public EventCallback ReturnAction { get; set; }
+
+    public bool FormPostedSuccessfully { get; set; } = false;
+
+    private async Task HandleValidSubmit()
+    {
+        if (TimeSpan.TryParse(startTimeString, out var startTime) &&
+            TimeSpan.TryParse(finalTimeString, out var finalTime))
+        {
+            Reservacion.StartTime = startTime;
+            Reservacion.FinalTime = finalTime;
+            await OnSubmit.InvokeAsync(null);
+        }
+        else
+        {
+            await swal.FireAsync("Error", "Los tiempos proporcionados no son válidos.", SweetAlertIcon.Error);
+        }
+    }
+
+    private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+    {
+        var formularioFueEditado = editContext.IsModified();
+
+        if (!formularioFueEditado)
+        {
+            return;
+        }
+
+        if (FormPostedSuccessfully)
+        {
+            return;
+        }
+
+        var resultado = await swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Deseas abandonar la página y perder los cambios?",
+                Icon = SweetAlertIcon.Warning,
+                ShowCancelButton = true
+            });
+
+        var confirmado = !string.IsNullOrEmpty(resultado.Value);
+
+        if (confirmado)
+        {
+            return;
+        }
+
+        context.PreventNavigation();
+    }
+}

@@ -1,0 +1,64 @@
+﻿@page "/reservacion/create"
+
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+
+<h3>Crear</h3>
+<ReservacionForm @ref="reservacionForm" Reservacion="reservacion" OnSubmit="Create" ReturnAction="Return" />
+
+@code {
+    private Reservacion reservacion = new Reservacion();
+    private ReservacionForm reservacionForm;
+
+
+
+    private async Task Create()
+    {
+
+
+        var responseHttp = await repository.PostAsync("/api/reservacion", reservacion);
+        if (responseHttp.Error)
+        {
+
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+
+
+        }
+
+        Return();
+
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+
+                Toast = true,
+                Position = SweetAlertPosition.BottomEnd,
+                ShowConfirmButton = true,
+                Timer = 3000
+
+            });
+
+
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Registro creado con éxito");
+    }
+
+
+    private void Return()
+    {
+
+
+
+
+        reservacionForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/reservacion");
+
+
+
+
+    }
+
+
+}

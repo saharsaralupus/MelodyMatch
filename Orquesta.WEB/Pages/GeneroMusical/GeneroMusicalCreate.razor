@@ -1,0 +1,65 @@
+﻿@page "/generoMusical/create"
+@using CurrieTechnologies.Razor.SweetAlert2
+@inject NavigationManager navigationManager
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+
+<h3>Crear</h3>
+
+<GeneroMusicalForm @ref="generoMusicalForm" GeneroMusical="generoMusical" OnSubmit="Create" ReturnAction="Return"/>
+
+@code {
+    private GeneroMusical generoMusical = new GeneroMusical();
+    private GeneroMusicalForm generoMusicalForm;
+
+
+
+    private async Task Create()
+    {
+
+
+        var responseHttp = await repository.PostAsync("/api/generoMusical", generoMusical);
+        if (responseHttp.Error)
+        {
+
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+
+
+        }
+
+        Return();
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+
+                Toast = true,
+                Position = SweetAlertPosition.BottomEnd,
+                ShowConfirmButton = true,
+                Timer = 3000
+
+
+            });
+
+
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Registro creado con éxito");
+    }
+
+
+    private void Return()
+    {
+
+
+
+
+        generoMusicalForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/generoMusical");
+
+
+
+
+    }
+
+
+}
+

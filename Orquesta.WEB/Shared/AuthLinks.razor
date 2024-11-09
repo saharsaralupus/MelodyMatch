@@ -1,0 +1,94 @@
+﻿<AuthorizeView>
+    <Authorized>
+        <div class="dropdown" style="position: relative;">
+            <button class="btn btn-purple dropdown-toggle" type="button" id="dropdownMenuButton" aria-expanded="@isDropdownOpen.ToString().ToLower()" @onclick="ToggleDropdown">
+                @if (!string.IsNullOrEmpty(photoUser))
+                {
+                    <img src="@photoUser" width="50" height="45" style="border-radius: 50%; margin-right: 10px;" />
+                }
+                <span class="username">@context.User.Identity!.Name</span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="display: @(isDropdownOpen ? "block" : "none")">
+                <li><a class="dropdown-item" href="EditUser">Editar perfil</a></li>
+                <li><a class="dropdown-item" href="Logout">Cerrar Sesión</a></li>
+            </ul>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <a href="Login" class="nav-link btn btn-link" style="background-color:  #ff005a; color: white;  padding: 6px 30px; border-radius: 10px; text-align: center; text-decoration: none; transition: background-color 0.3s ease;">Iniciar Sesión</a>
+        <a href="register" class="nav-link btn btn-link" style="background-color:  #ff005a; color: white; margin-right:30px; padding: 6px 30px; border-radius: 10px; text-align: center; text-decoration: none; transition: background-color 0.3s ease;">Registro</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+<style>
+    .btn-purple {
+        background: #2d2d2d;
+        color: white;
+        border: none;
+    }
+
+        .btn-purple:hover {
+            background: #2d2d2d;
+            color: white; /* Asegura que el texto permanezca blanco al pasar el ratón por encima */
+        }
+
+    .dropdown-menu {
+        position: absolute;
+        right: 0;
+        background: #2d2d2d;
+        border: none;
+        display: none;
+        width: 150px; /* Ajusta el ancho del menú desplegable */
+        padding: 0;
+        box-sizing: border-box; /* Asegura que el padding se incluya en el ancho total */
+    }
+
+        .dropdown-menu .dropdown-item {
+            color: white;
+            padding: 10px 15px; /* Ajusta el padding para mantener el tamaño coherente */
+            white-space: nowrap; /* Evita que el texto se envuelva */
+            box-sizing: border-box; /* Asegura que el padding se incluya en el ancho total */
+            width: 85%;
+        }
+
+            .dropdown-menu .dropdown-item:hover,
+            .dropdown-menu .dropdown-item:focus,
+            .dropdown-menu .dropdown-item:active {
+                background: #1a1a1a; /* Cambia el color de fondo al pasar el ratón por encima */
+                color: white; /* Asegura que el texto permanezca blanco */
+                width: 85%;
+            }
+
+    .dropdown:hover .dropdown-menu {
+        display: block;
+    }
+
+    .username {
+        margin-left: 10px;
+    }
+</style>
+
+
+
+@code {
+    private string? photoUser;
+    private bool isDropdownOpen = false;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; } = null!;
+
+    protected async override Task OnParametersSetAsync()
+    {
+        var authenticationState = await authenticationStateTask;
+        var claims = authenticationState.User.Claims.ToList();
+        var photoClaim = claims.FirstOrDefault(x => x.Type == "Photo");
+        if (photoClaim is not null)
+        {
+            photoUser = photoClaim.Value;
+        }
+    }
+    private void ToggleDropdown()
+    {
+        isDropdownOpen = !isDropdownOpen;
+    }
+}

@@ -1,0 +1,135 @@
+﻿@page "/integrante"
+@using Orquesta.Shared.Entities
+@using Orquesta.WEB.Repositories
+@using Orquesta.WEB.Shared
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+
+<div class="card">
+    <div class="card-header">
+        <span>
+            <i class="bi bi-person" /> Integrante
+            <a class="btn btn-primary btn-sm float-end" href="/integrante/create"><i class="bi bi-plus-circle" /> Nuevo Integrante</a>
+
+        </span>
+    </div>
+
+    <div class="card-body">
+
+        <GenericList MyList="Integrantes">
+
+            <Body>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+
+
+                                <b>Id</b>
+                            <td><b>Nombre</b></td>
+                            <td><b>Agrupación</b></td>
+                            <td><b>Opciones</b></td>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Integrantes!)
+                        {
+                            <tr>
+                                <td> @item.Id</td>
+                                <td> @item.Name </td>
+                                <td> @GetAgrupacionSolistaName(item.AgrupacionId)</td>
+
+
+                                <td>
+                                    <a href="/integrante/edit/@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square" /> Editar</a>
+                                    <button @onclick=@(() => DeleteAsycn(item)) class="btn btn-sm btn-danger"><i class="bi bi-trash-fill" /> Borrar</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </Body>
+        </GenericList>
+    </div>
+</div>
+
+
+@code {
+    public List<Integrante> Integrantes { get; set; }
+    public List<Agrupacion> AgrupacionSolistas { get; set; }
+    
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.GetAsync<List<Integrante>>("/api/integrante");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+        Integrantes = responseHttp.Response;
+
+        var responseAgrupacionSolista = await repository.GetAsync<List<Agrupacion>>("/api/agrupacionSolista");
+        if (!responseAgrupacionSolista.Error)
+        {
+            AgrupacionSolistas = responseAgrupacionSolista.Response;
+        }
+    }
+
+    private string GetAgrupacionSolistaName(int AgrupacionSolistaId)
+    {
+        var agrupacionSolista = AgrupacionSolistas.FirstOrDefault(i => i.Id == AgrupacionSolistaId);
+        return agrupacionSolista != null ? agrupacionSolista.Name : "Representante no encontrado";
+    }
+
+
+    private async Task DeleteAsycn(Integrante integrante)
+    {
+        var result = await sweetAlertService.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = $"¿Estas seguro de querer borrar la relación entre el integrante {integrante.Name} y la banda {integrante.AgrupacionId}?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true,
+            });
+        var confirm = string.IsNullOrEmpty(result.Value);
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHttp = await repository.DeleteAsync<Integrante>($"/api/integrante/{integrante.Id}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("Integrante");
+            }
+            else
+            {
+                var mensajeError = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+            }
+            return;
+        }
+
+        await LoadAsync();
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+                Toast = true,
+                Position = SweetAlertPosition.BottomEnd,
+                ShowConfirmButton = true,
+                Timer = 3000
+            });
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Registro borrado con éxito.");
+    }
+}
+

@@ -1,0 +1,75 @@
+﻿@page "/agrupacionGenero/edit/{Id:int}"
+@using System.Net
+@using CurrieTechnologies.Razor.SweetAlert2
+@inject NavigationManager navigationManager
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+
+<h3>Editar</h3>
+
+@if (agrupacion_Genero is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <Agrupacion_Genero_Form @ref="agrupacionGeneroForm" Agrupacion_Genero="agrupacion_Genero" OnSubmit="Editar" ReturnAction="Return" />
+
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Agrupacion_Genero agrupacion_Genero;
+    private Agrupacion_Genero_Form agrupacionGeneroForm;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var responseHttp = await repository.GetAsync<Agrupacion_Genero>($"/api/agrupacionGenero/{Id}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/agrupacionGenero");
+            }
+            else
+            {
+                var messsage = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", messsage, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            agrupacion_Genero = responseHttp.Response;
+        }
+    }
+
+
+    private async Task Editar()
+    {
+        var responseHttp = await repository.PutAsync("/api/agrupacionGenero", agrupacion_Genero);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+        }
+
+        Return();
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+                Toast = true,
+                Position = SweetAlertPosition.BottomEnd,
+                ShowConfirmButton = true,
+                Timer = 3000
+            });
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Cambios guardados con éxito.");
+    }
+
+    private void Return()
+    {
+        agrupacionGeneroForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/agrupacionGenero");
+    }
+
+}

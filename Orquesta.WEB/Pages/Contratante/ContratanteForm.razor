@@ -1,0 +1,104 @@
+﻿@using CurrieTechnologies.Razor.SweetAlert2
+﻿@using Orquesta.Shared.Entities
+@inject SweetAlertService swal
+
+<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation"></NavigationLock>
+
+<EditForm EditContext="editContext" OnValidSubmit="OnSubmit">
+	<DataAnnotationsValidator />
+
+	<div class="mb-3">
+		<label>Nombre</label>
+		<div>
+			<InputText class="form-control" @bind-Value="Contratante.Name" />
+			<ValidationMessage For="@(() => Contratante.Name)"/>
+		</div>
+	</div>
+
+	<div class="mb-3">
+		<label>Cedula</label>
+		<div>
+			<InputText @bind-Value="Contratante.Document" />
+			<ValidationMessage For="@(() => Contratante.Document)" />
+		</div>
+	</div>
+
+	<div class="mb-3">
+		<label>Teléfono</label>
+		<div>
+			<InputText @bind-Value="Contratante.PhoneNumber" />
+			<ValidationMessage For="@(() => Contratante.PhoneNumber)" />
+		</div>
+	</div>
+
+	<div class="mb-3">
+		<label>Correo Electrónico</label>
+		<div>
+			<InputText @bind-Value="Contratante.Email" />
+			<ValidationMessage For="@(() => Contratante.Email)" />
+		</div>
+	</div>
+
+	<button class="btn btn-primary" type="submit">Guardar</button>
+	<button class="btn btn-info" type="reset">Limpiar</button>
+	<button class="btn btn-success" @onclick="ReturnAction">Regresar</button>
+
+</EditForm>
+
+@code {
+
+	private EditContext editContext = null;
+	protected override void OnInitialized()
+	{
+		editContext = new(Contratante);
+	}
+
+	[EditorRequired]
+	[Parameter]
+
+	public Contratante Contratante { get; set; }
+
+	[EditorRequired]
+	[Parameter]
+
+	public EventCallback OnSubmit { get; set; }
+
+	[EditorRequired]
+	[Parameter]
+	public EventCallback ReturnAction { get; set; }
+
+	public bool FormPostedSuccessfully { get; set; } = false;
+
+	private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+	{
+		var formularioFueEditado = editContext.IsModified();
+
+		if (!formularioFueEditado)
+		{
+			return;
+		}
+
+		if (FormPostedSuccessfully)
+		{
+			return;
+		}
+
+		var resultado = await swal.FireAsync(new SweetAlertOptions
+			{
+				Title = "Confirmación",
+				Text = "¿Deseas abandonar la página y perder los cambios?",
+				Icon = SweetAlertIcon.Warning,
+				ShowCancelButton = true
+			});
+
+		var confirmado = !string.IsNullOrEmpty(resultado.Value);
+
+		if (confirmado)
+		{
+			return;
+		}
+
+		context.PreventNavigation();
+	}
+
+}

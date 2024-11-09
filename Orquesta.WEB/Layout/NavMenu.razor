@@ -1,0 +1,105 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">   
+        <a class="navbar-brand" href="#">
+            <img src="https://i.ibb.co/Df834Nh/logo.jpg" alt="Logo" style="height: 55px; width: 190px">
+        </a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+         <AuthorizeView Roles="Admin">
+             <Authorized>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="contratante" style="line-height: 1.5;">
+                <i class="bi bi-people-fill" aria-hidden="true"></i> Contratante
+            </NavLink>
+        </div>
+
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="representante" style="line-height: 1.5;">
+                <i class="bi bi-briefcase-fill" aria-hidden="true"></i> Representante
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="instrumento" style="line-height: 1.5;">
+                <i class="bi bi-music-note" aria-hidden="true" style="line-height: inherit;"></i> Instrumento
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="generoMusical" style="line-height: 1.5;">
+                <i class="bi bi-boombox" aria-hidden="true" style="line-height: inherit;"></i> Género Musical
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="tipoEvento" style="line-height: 1.5;">
+                <i class="bi bi-calendar-event" aria-hidden="true" style="line-height: inherit;"></i> Tipo Evento
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="agrupacionSolista" style="line-height: 1.5;">
+                <i class="bi bi-vinyl-fill" aria-hidden="true" style="line-height: inherit;"></i> Agrupación o Solista
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="integrante" style="line-height: 1.5;">
+                <i class="bi bi-person-check-fill" aria-hidden="true" style="line-height: inherit;"></i> Integrante
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="reservacion" style="line-height: 1.5;">
+                <i class="bi bi-hand-index-fill" aria-hidden="true" style="line-height: inherit;"></i> Reservación
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="agrupacionGenero" style="line-height: 1.5;">
+                <i class="bi bi-music-note-beamed" aria-hidden="true" style="line-height: inherit;"></i> Agrupacion y Género
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="agrupacionEvento" style="line-height: 1.5;">
+                <i class="bi bi-file-earmark-music-fill" aria-hidden="true" style="line-height: inherit;"></i> Agrupacion y Evento
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="integranteInstrumento" style="line-height: 1.5;">
+                <i class="bi bi-music-note-list" aria-hidden="true" style="line-height: inherit;"></i> Integrante e Instrumento
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="users" style="line-height: 1.5;">
+                        <span class="bi bi-person-check-fill" aria-hidden="true" style="line-height: inherit;"></span> Administrar Usuarios
+            </NavLink>
+        </div>
+            </Authorized>
+        </AuthorizeView>
+
+
+
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

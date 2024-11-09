@@ -1,0 +1,128 @@
+﻿@page "/contratante"
+@using CurrieTechnologies.Razor.SweetAlert2
+@using Orquesta.Shared.Entities
+@using Orquesta.WEB.Repositories
+@using Orquesta.WEB.Shared
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+
+
+<div class="card">
+    <div class="card-header">
+        <span>
+            <i class="bi bi-person" /> Contratante
+            <a class="btn btn-primary btn-sm float-end" href="/contratante/create"><i class="bi bi-plus-circle" /> Nuevo Contratante</a>
+
+        </span>
+    </div>
+
+    <div class="card-body">
+
+        <GenericList MyList="Contratantes">
+
+            <Body>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+
+
+                            <b>Id</b>
+                            <td><b>Documento</b></td>
+                            <td><b>Nombre</b></td>
+                            <td><b>Numero</b></td>
+                            <td><b>Correo</b></td>
+                            <td><b>Opciones</b></td>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in Contratantes!)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td>@item.Document</td>
+                                <td>@item.Name </td>
+                                <td>@item.PhoneNumber</td>
+                                <td>@item.Email</td>
+
+                                <td>
+                                    <a href="/contratante/edit/@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square" /> Editar</a>
+                                    <button @onclick=@(() => DeleteAsycn(item)) class="btn btn-sm btn-danger"><i class="bi bi-trash-fill"/> Borrar</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </Body>
+        </GenericList>
+    </div>
+</div>
+
+
+@code {
+    public List<Contratante> Contratantes { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.GetAsync<List<Contratante>>("/api/contratante");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+        Contratantes = responseHttp.Response;
+    }
+
+
+
+    private async Task DeleteAsycn(Contratante contratante)
+    {
+        var result = await sweetAlertService.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = $"¿Estas seguro de querer borrar el investigador: {contratante.Name}?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true,
+            });
+        var confirm = string.IsNullOrEmpty(result.Value);
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHttp = await repository.DeleteAsync<Contratante>($"/api/contratante/{contratante.Id}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("Contratante");
+            }
+            else
+            {
+                var mensajeError = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+            }
+            return;
+        }
+
+        await LoadAsync();
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+                Toast = true,
+                Position = SweetAlertPosition.BottomEnd,
+                ShowConfirmButton = true,
+                Timer = 3000
+            });
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Registro borrado con éxito.");
+    }
+}

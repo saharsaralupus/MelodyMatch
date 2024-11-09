@@ -1,0 +1,75 @@
+﻿@page "/reservacion/edit/{Id:int}"
+@using System.Net
+@using CurrieTechnologies.Razor.SweetAlert2
+@inject NavigationManager navigationManager
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+
+<h3>Editar</h3>
+
+@if (reservacion is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <ReservacionForm @ref="reservacionForm" Reservacion="reservacion" OnSubmit="Editar" ReturnAction="Return" />
+
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Reservacion reservacion;
+    private ReservacionForm reservacionForm;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var responseHttp = await repository.GetAsync<Reservacion>($"/api/reservacion/{Id}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/reservacion");
+            }
+            else
+            {
+                var messsage = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", messsage, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            reservacion = responseHttp.Response;
+        }
+    }
+
+
+    private async Task Editar()
+    {
+        var responseHttp = await repository.PutAsync("/api/reservacion", reservacion);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+        }
+
+        Return();
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+                Toast = true,
+                Position = SweetAlertPosition.BottomEnd,
+                ShowConfirmButton = true,
+                Timer = 3000
+            });
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Cambios guardados con éxito.");
+    }
+
+    private void Return()
+    {
+        reservacionForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/reservacion");
+    }
+
+}

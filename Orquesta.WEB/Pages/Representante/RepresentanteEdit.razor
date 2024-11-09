@@ -1,0 +1,75 @@
+﻿@page "/representante/edit/{Id:int}"
+@using System.Net
+@using CurrieTechnologies.Razor.SweetAlert2
+@inject NavigationManager navigationManager
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+
+<h3>Editar</h3>
+
+@if (representante is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <RepresentanteForm @ref="representanteForm" Representante="representante" OnSubmit="Editar" ReturnAction="Return" />
+
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Representante representante;
+    private RepresentanteForm representanteForm;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var responseHttp = await repository.GetAsync<Representante>($"api/representante/{Id}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/representante");
+            }
+            else
+            {
+                var messsage = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", messsage, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            representante = responseHttp.Response;
+        }
+    }
+
+
+    private async Task Editar()
+    {
+        var responseHttp = await repository.PutAsync("/api/representante", representante);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+        }
+
+    Return();
+    var toast = sweetAlertService.Mixin(new SweetAlertOptions
+    {
+        Toast = true,
+        Position = SweetAlertPosition.BottomEnd,
+        ShowConfirmButton = true,
+        Timer = 3000
+    });
+    await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Cambios guardados con éxito.");
+}
+
+        private void Return()
+        {
+        representanteForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/representante");
+        }
+   
+}

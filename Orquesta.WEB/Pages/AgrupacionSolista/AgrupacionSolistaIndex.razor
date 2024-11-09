@@ -1,0 +1,135 @@
+﻿@page "/agrupacionSolista"
+@using Orquesta.Shared.Entities
+@using Orquesta.WEB.Repositories
+@using Orquesta.WEB.Shared
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+
+<div class="card">
+    <div class="card-header">
+        <span>
+            <i class="bi bi-vinyl-fill" /> Agrupación/Solista
+            <a class="btn btn-primary btn-sm float-end" href="/agrupacionSolista/create"><i class="bi bi-plus-circle" /> Nueva Agrupacion</a>
+
+        </span>
+    </div>
+
+    <div class="card-body">
+
+        <GenericList MyList="AgrupacionSolistas">
+
+            <Body>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+
+
+                                <b>Id</b>
+                            <td><b>Nombre</b></td>
+                            <td><b>Precio por Hora</b></td>
+                            <td><b>Representante</b></td>
+                            <td><b>Opciones</b></td>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in AgrupacionSolistas!)
+                        {
+                            <tr>
+                                <td> @item.Id</td>
+                                <td> @item.Name </td>
+                                <td> @item.Price_Hour </td>
+                                <td> @GetRepresentanteName(item.RepresentanteId)</td>
+                                
+
+                                <td>
+                                    <a href="/agrupacionSolista/edit/@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square" /> Editar</a>
+                                    <button @onclick=@(() => DeleteAsycn(item)) class="btn btn-sm btn-danger"><i class="bi bi-trash-fill" /> Borrar</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </Body>
+        </GenericList>
+    </div>
+</div>
+
+
+@code {
+    public List<Agrupacion> AgrupacionSolistas { get; set; }
+    public List<Representante> Representantes { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.GetAsync<List<Agrupacion>>("/api/agrupacionSolista");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+        AgrupacionSolistas = responseHttp.Response;
+
+        var responseRepresentante = await repository.GetAsync<List<Representante>>("/api/representante");
+        if (!responseRepresentante.Error)
+        {
+            Representantes = responseRepresentante.Response;
+        }
+    }
+
+    private string GetRepresentanteName(int RepresentanteId)
+    {
+        var representante = Representantes.FirstOrDefault(i => i.Id == RepresentanteId);
+        return representante != null ? representante.Name : "Representante no encontrado";
+    }
+
+
+    private async Task DeleteAsycn(Agrupacion agrupacionSolista)
+    {
+        var result = await sweetAlertService.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = $"¿Estas seguro de querer borrar la relación entre el representante de Id {agrupacionSolista.RepresentanteId}?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true,
+            });
+        var confirm = string.IsNullOrEmpty(result.Value);
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHttp = await repository.DeleteAsync<Agrupacion>($"/api/agrupacionSolista/{agrupacionSolista.Id}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("AgrupacionSolista");
+            }
+            else
+            {
+                var mensajeError = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+            }
+            return;
+        }
+
+        await LoadAsync();
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+                Toast = true,
+                Position = SweetAlertPosition.BottomEnd,
+                ShowConfirmButton = true,
+                Timer = 3000
+            });
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Registro borrado con éxito.");
+    }
+}

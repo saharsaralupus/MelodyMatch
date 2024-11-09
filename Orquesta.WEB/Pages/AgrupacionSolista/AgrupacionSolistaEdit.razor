@@ -1,0 +1,76 @@
+﻿@page "/agrupacionSolista/edit/{Id:int}"
+@using System.Net
+@using CurrieTechnologies.Razor.SweetAlert2
+@inject NavigationManager navigationManager
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+
+<h3>Editar</h3>
+
+@if (agrupacionSolista is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <AgrupacionSolistaForm @ref="agrupacionSolistaForm" AgrupacionSolista="agrupacionSolista" OnSubmit="Editar" ReturnAction="Return" />
+
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Agrupacion agrupacionSolista;
+    private AgrupacionSolistaForm agrupacionSolistaForm;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var responseHttp = await repository.GetAsync<Agrupacion>($"/api/agrupacionSolista/{Id}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/agrupacionSolista");
+            }
+            else
+            {
+                var messsage = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", messsage, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            agrupacionSolista = responseHttp.Response;
+        }
+    }
+
+
+    private async Task Editar()
+    {
+        var responseHttp = await repository.PutAsync("/api/agrupacionSolista", agrupacionSolista);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+        }
+
+        Return();
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+                Toast = true,
+                Position = SweetAlertPosition.BottomEnd,
+                ShowConfirmButton = true,
+                Timer = 3000
+            });
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Cambios guardados con éxito.");
+    }
+
+    private void Return()
+    {
+        agrupacionSolistaForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/agrupacionSolista");
+    }
+
+}
+
