@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Orquesta.API.Controllers
 {
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("/api/contratante")]
     public class ContratanteController : ControllerBase
     {
@@ -34,8 +34,8 @@ namespace Orquesta.API.Controllers
 
 
         //Método POST- insertar en base de datos
+        [AllowAnonymous]
         [HttpPost]
-
         public async Task<ActionResult> Post(Contratante contrante)
         {
 

@@ -34,6 +34,7 @@ namespace Orquesta.API.Controllers
 
 
         //Método POST- insertar en base de datos
+        [AllowAnonymous]
         [HttpPost]
 
         public async Task<ActionResult> Post(Representante representante)

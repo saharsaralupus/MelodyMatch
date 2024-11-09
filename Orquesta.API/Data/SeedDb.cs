@@ -34,7 +34,6 @@ namespace Orquesta.API.Data
             await CheckContratanteAsync();
             await CheckRoleAsync();
             await CheckUserAsync("1010", "Super", "Admin", "saralefay2010@gmail.com", "3015555555", UserType.Admin);
-
         }
 
         private async Task CheckRoleAsync()

@@ -105,6 +105,15 @@
                                 <label for="floatingInput7">Confirmación de contraseña</label>
                                 <ValidationMessage For="@(() => userDTO.PasswordConfirm)" />
                             </div>
+                            <div class="form-floating mb-3">
+                                <InputSelect class="form-select" id="floatingInput7" @bind-Value="@userDTO.UserType">
+                                    <option value="">Seleccione tipo de usuario</option>
+                                    <option value="UserContratante">Contratante</option>
+                                    <option value="UserRepresentante">Representante</option>
+                                </InputSelect>
+                                <label for="floatingInput7">Tipo de Usuario</label>
+                                <ValidationMessage For="@(() => userDTO.UserType)" />
+                            </div>
                             <div class="mb-3">
                                 <InputFile OnChange="HandleSelectedImage" class="form-control" />
                                 @if (!string.IsNullOrEmpty(imageUrl))
@@ -125,6 +134,10 @@
     private User Users = new();
     private UserDTO userDTO = new();
     private string imageUrl;
+    private Contratante contratante = new Contratante();
+    private Representante representante = new Representante();
+
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -168,14 +181,6 @@
     private async Task CreateUserAsync()
     {
         userDTO.UserName = userDTO.Email;
-        if (IsAdmin)
-        {
-            userDTO.UserType = UserType.Admin;
-        }
-        else
-        {
-            userDTO.UserType = UserType.UserContratante;
-        }
         var responseHttp = await repository.PostAsync<UserDTO>("/api/accounts/CreateUser", userDTO);
         if (responseHttp.Error)
         {
@@ -183,6 +188,29 @@
             await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
             return;
         }
+
+        if(userDTO.UserType == UserType.UserContratante)
+        {
+            contratante.Id = 0;
+            contratante.Document = userDTO.Document;
+            contratante.Name = userDTO.FirstName + " " + userDTO.LastName;
+            contratante.PhoneNumber = userDTO.PhoneNumber;
+            contratante.Email = userDTO.Email;
+
+            var responseHttp2 = await repository.PostAsync("/api/contratante", contratante);
+        }
+
+        if (userDTO.UserType == UserType.UserRepresentante)
+        {
+            representante.Id = 0;
+            representante.Document = userDTO.Document;
+            representante.Name = userDTO.FirstName + " " + userDTO.LastName;
+            representante.PhoneNumber = userDTO.PhoneNumber;
+            representante.Email = userDTO.Email;
+
+            var responseHttp3 = await repository.PostAsync("/api/representante", representante);
+        }
+
         if (IsAdmin == true)
         {
             navigationManager.NavigateTo("/Users");
