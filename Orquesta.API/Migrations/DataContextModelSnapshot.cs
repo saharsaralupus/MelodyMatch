@@ -208,6 +208,56 @@ namespace Orquesta.API.Migrations
                     b.ToTable("Agrupacion_Generos");
                 });
 
+            modelBuilder.Entity("Orquesta.Shared.Entities.Calificacion_Agrupacion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AgrupacionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Comentario")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Puntaje")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AgrupacionId");
+
+                    b.ToTable("Calificaciones_Agrupacion");
+                });
+
+            modelBuilder.Entity("Orquesta.Shared.Entities.Calificacion_Contratante", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Comentario")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("ContratanteId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Puntaje")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContratanteId");
+
+                    b.ToTable("Calificaciones_Contratante");
+                });
+
             modelBuilder.Entity("Orquesta.Shared.Entities.Contratante", b =>
                 {
                     b.Property<int>("Id")
@@ -545,6 +595,28 @@ namespace Orquesta.API.Migrations
                     b.Navigation("GeneroMusical");
                 });
 
+            modelBuilder.Entity("Orquesta.Shared.Entities.Calificacion_Agrupacion", b =>
+                {
+                    b.HasOne("Orquesta.Shared.Entities.Agrupacion", "Agrupacion")
+                        .WithMany("Calificaciones_Agrupacion")
+                        .HasForeignKey("AgrupacionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Agrupacion");
+                });
+
+            modelBuilder.Entity("Orquesta.Shared.Entities.Calificacion_Contratante", b =>
+                {
+                    b.HasOne("Orquesta.Shared.Entities.Contratante", "Contratante")
+                        .WithMany("Calificaciones_Contratante")
+                        .HasForeignKey("ContratanteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Contratante");
+                });
+
             modelBuilder.Entity("Orquesta.Shared.Entities.Integrante", b =>
                 {
                     b.HasOne("Orquesta.Shared.Entities.Agrupacion", "Agrupacion")
@@ -588,6 +660,8 @@ namespace Orquesta.API.Migrations
 
             modelBuilder.Entity("Orquesta.Shared.Entities.Agrupacion", b =>
                 {
+                    b.Navigation("Calificaciones_Agrupacion");
+
                     b.Navigation("Integrantes");
 
                     b.Navigation("Reservaciones");
@@ -595,6 +669,8 @@ namespace Orquesta.API.Migrations
 
             modelBuilder.Entity("Orquesta.Shared.Entities.Contratante", b =>
                 {
+                    b.Navigation("Calificaciones_Contratante");
+
                     b.Navigation("Reservaciones");
                 });
 

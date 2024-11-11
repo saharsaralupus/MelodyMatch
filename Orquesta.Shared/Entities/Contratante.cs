@@ -35,5 +35,8 @@ namespace Orquesta.Shared.Entities
 
         [JsonIgnore]
         public ICollection<Reservacion> Reservaciones { get; } = new List<Reservacion>();
+
+        [JsonIgnore]
+        public ICollection<Calificacion_Contratante> Calificaciones_Contratante { get; } = new List<Calificacion_Contratante>();
     }
 }

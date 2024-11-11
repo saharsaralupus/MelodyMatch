@@ -21,7 +21,7 @@
         height: 100vh;
         display: flex;
         justify-content: center;
-        aling-item: center;
+        align-items: center;
         background-image: url('https://images.pexels.com/photos/1434625/pexels-photo-1434625.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
         background-size: cover;
         background-position:center;
@@ -187,28 +187,6 @@
             var message = await responseHttp.GetErrorMessageAsync();
             await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
             return;
-        }
-
-        if(userDTO.UserType == UserType.UserContratante)
-        {
-            contratante.Id = 0;
-            contratante.Document = userDTO.Document;
-            contratante.Name = userDTO.FirstName + " " + userDTO.LastName;
-            contratante.PhoneNumber = userDTO.PhoneNumber;
-            contratante.Email = userDTO.Email;
-
-            var responseHttp2 = await repository.PostAsync("/api/contratante", contratante);
-        }
-
-        if (userDTO.UserType == UserType.UserRepresentante)
-        {
-            representante.Id = 0;
-            representante.Document = userDTO.Document;
-            representante.Name = userDTO.FirstName + " " + userDTO.LastName;
-            representante.PhoneNumber = userDTO.PhoneNumber;
-            representante.Email = userDTO.Email;
-
-            var responseHttp3 = await repository.PostAsync("/api/representante", representante);
         }
 
         if (IsAdmin == true)

@@ -207,6 +207,27 @@ namespace Orquesta.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Calificaciones_Contratante",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Puntaje = table.Column<int>(type: "int", nullable: false),
+                    Comentario = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    ContratanteId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Calificaciones_Contratante", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Calificaciones_Contratante_Contratantes_ContratanteId",
+                        column: x => x.ContratanteId,
+                        principalTable: "Contratantes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Agrupaciones",
                 columns: table => new
                 {
@@ -250,6 +271,27 @@ namespace Orquesta.API.Migrations
                         name: "FK_Agrupacion_Generos_GeneroMusicales_GeneroMusicalId",
                         column: x => x.GeneroMusicalId,
                         principalTable: "GeneroMusicales",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Calificaciones_Agrupacion",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Puntaje = table.Column<int>(type: "int", nullable: false),
+                    Comentario = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    AgrupacionId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Calificaciones_Agrupacion", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Calificaciones_Agrupacion_Agrupaciones_AgrupacionId",
+                        column: x => x.AgrupacionId,
+                        principalTable: "Agrupaciones",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -380,6 +422,16 @@ namespace Orquesta.API.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Calificaciones_Agrupacion_AgrupacionId",
+                table: "Calificaciones_Agrupacion",
+                column: "AgrupacionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Calificaciones_Contratante_ContratanteId",
+                table: "Calificaciones_Contratante",
+                column: "ContratanteId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Integrantes_AgrupacionId",
                 table: "Integrantes",
                 column: "AgrupacionId");
@@ -420,6 +472,12 @@ namespace Orquesta.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "Calificaciones_Agrupacion");
+
+            migrationBuilder.DropTable(
+                name: "Calificaciones_Contratante");
 
             migrationBuilder.DropTable(
                 name: "Integrantes");

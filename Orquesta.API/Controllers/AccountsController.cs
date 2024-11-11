@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Orquesta.API.Helpers;
 using Orquesta.Shared.DTOs;
+using Orquesta.Shared.Enums;
 using Orquesta.Shared.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ using System.Linq;
 using Orquesta.API.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Metadata;
+using System.Diagnostics.Contracts;
 
 namespace Orquesta.API.Controllers
 
@@ -30,6 +32,9 @@ namespace Orquesta.API.Controllers
         private readonly string _container;
         private readonly IMailHelper _mailHelper;
         private readonly DataContext _context;
+        private Contratante contratante = new Contratante();
+        private Representante representante = new Representante();
+
         public AccountsController(IUserHelper userHelper, IConfiguration configuration, IFileStorage fileStorage, IMailHelper mailHelper, DataContext context)
         {
             _userHelper = userHelper;
@@ -76,8 +81,16 @@ namespace Orquesta.API.Controllers
             try
             {
 
-                if (result.Succeeded)
+                if (result.Succeeded && user.UserType == UserType.UserContratante)
                 {
+                   
+                    contratante.Name = user.FullName;
+                    contratante.Document = user.Document;
+                    contratante.PhoneNumber = user.PhoneNumber;
+                    contratante.Email = user.Email;
+                    _context.Add(contratante);
+                    await _context.SaveChangesAsync();
+
                     await _userHelper.AddUserToRoleAsync(user, user.UserType.ToString());
                     var myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
                     var tokenLink = Url.Action("ConfirmEmail", "accounts", new
@@ -99,6 +112,41 @@ namespace Orquesta.API.Controllers
 
                     return BadRequest(response.Message);
                 }
+
+                else if (result.Succeeded && user.UserType == UserType.UserRepresentante)
+                {
+
+                    representante.Name = user.FullName;
+                    representante.Document = user.Document;
+                    representante.PhoneNumber = user.PhoneNumber;
+                    representante.Email = user.Email;
+                    _context.Add(representante);
+                    await _context.SaveChangesAsync();
+
+                    await _userHelper.AddUserToRoleAsync(user, user.UserType.ToString());
+                    var myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
+                    var tokenLink = Url.Action("ConfirmEmail", "accounts", new
+                    {
+                        userid = user.Id,
+                        token = myToken
+                    }, HttpContext.Request.Scheme, _configuration["UrlWEB"]);
+
+                    var response = _mailHelper.SendMail(user.FullName, user.Email!,
+                        $"Orquestas- Confirmación de cuenta",
+                        $"<h1>Orquesta - Confirmación de cuenta</h1>" +
+                        $"<p>Para habilitar el usuario, por favor hacer clic 'Confirmar Email':</p>" +
+                        $"<b><a href ={tokenLink}>Confirmar Email</a></b>");
+
+                    if (response.IsSuccess)
+                    {
+                        return NoContent();
+                    }
+
+                    return BadRequest(response.Message);
+
+                }
+                    
+
                 if (result.Errors.FirstOrDefault().Code.Contains(("Duplicate")))
                 {
                     return BadRequest("There is already an account associated with this email");

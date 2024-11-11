@@ -44,7 +44,7 @@ namespace Orquesta.API.Controllers
             var agrupacionSolista = await _context.Agrupaciones.FirstOrDefaultAsync(x => x.Id == id);
             if (agrupacionSolista == null)
             {
-                return NotFound("Agrupacion o solita not found");
+                return NotFound("Agrupacion no encontrada");
             }
 
             return Ok(agrupacionSolista);
@@ -68,7 +68,7 @@ namespace Orquesta.API.Controllers
 
             if(borrarMusico == null)
             {
-                return NotFound("Agrupación / Solista not found");
+                return NotFound("Agrupación no encontrada");
             }
             return NoContent();
 

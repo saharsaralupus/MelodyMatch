@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -34,6 +35,9 @@ namespace Orquesta.Shared.Entities
 
         [JsonIgnore]
         public ICollection<Reservacion> Reservaciones { get; } = new List<Reservacion>();
+
+        [JsonIgnore]
+        public ICollection<Calificacion_Agrupacion> Calificaciones_Agrupacion { get; } = new List<Calificacion_Agrupacion>();
 
     }
 }

@@ -10,8 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.Metrics;
 using Azure.Identity;
 using Azure;
-using System.Diagnostics.Metrics;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace Orquesta.API.Data

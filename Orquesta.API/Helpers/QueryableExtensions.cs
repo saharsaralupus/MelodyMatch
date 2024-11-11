@@ -1,6 +1,5 @@
 ﻿using Orquesta.Shared.DTOs;
 using System.Linq;
-using Orquesta.Shared.DTOs;
 
 namespace Orquesta.API.Helpers
 {

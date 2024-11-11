@@ -19,6 +19,9 @@ namespace Orquesta.API.Data
         public DbSet<Representante> Representantes { get; set; }
         public DbSet<Reservacion> Reservaciones { get; set; }
         public DbSet<Repertorio> Repertorios { get; set; }
+        public DbSet<Calificacion_Agrupacion> Calificaciones_Agrupacion { get; set; }
+        public DbSet<Calificacion_Contratante> Calificaciones_Contratante { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
