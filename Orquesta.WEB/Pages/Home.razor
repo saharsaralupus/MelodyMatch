@@ -108,6 +108,7 @@
         border: none;
         border-radius: 10px;
         cursor: pointer;
+        z-index: 100;
     }
 
         .my-button:hover {
@@ -115,8 +116,9 @@
         }
 
     h3{
+        color: white;
         font-family: 'Sans-serif';
-        color: black;
+        z-index:100;
     }
 
     .search-icon {
@@ -131,9 +133,7 @@
         width: 100%;
         height: 300px;
         object-fit: cover;
-        display: block;
-        background:#000000;
-        opacity: 0.01;
+        display: block;      
     }
 
 
@@ -141,35 +141,31 @@
 
 <div class="title-and-image-container">
     <div>
-       <AuthorizeView Roles="Admin, UserContratante">
-            <Authorized>
-                <!-- Barra de búsqueda -->
-                <div class="content-inline">
-                   @*<div class="search-inline">              
+            <AuthorizeView Roles="Admin, UserContratante">
+                <Authorized>
+                    <!-- Barra de búsqueda -->
+                    <div class="content-inline">
+                        @*<div class="search-inline">
                         <input name="txtSearch" class="search-inline--input" placeholder="Buscar">
                         <i class="bi bi-search search-icon"></i>
-                    </div>*@
-                    <h3>¡ENCUENTRA TU ORQUESTA IDEAL!</h3>
-                    <span>
-                        <td>
-                            <i class="bi bi-music-note-beamed"/>
-                            <a class="btn btn-primary btn-sm float-end" href="listabusqueda"> Clic Aquí!</a>
-                        </td>
-                    </span>
-                </div>
-            </Authorized>
+                        </div>*@
+                        <h3>¡ENCUENTRA TU ORQUESTA IDEAL!</h3>
+                    <a href="listabusqueda" class="my-button">Clic aquí!</a>
+                    </div>
+        </Authorized>
         </AuthorizeView>
 
         <!-- Imagen -->
-        <img class="scrollable-image" src="https://images.pexels.com/photos/995301/pexels-photo-995301.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="OrquesYa" width="300" height="300">
+        <img class="scrollable-image" src="https://images.unsplash.com/photo-1527606432722-8b1422ce77a1?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="OrquesYa" width="300" height="300">
     </div>
-    <div class="text">
-        <h1>
-            <img src="https://i.ibb.co/F4xgfcH/Logotipo-de-Banda-en-Negro-Naranja-y-Beis-con-L-neas.png" alt="OrquesYa" width="300" height="300">
-            MelodyMatch!
-        </h1>
-    </div>
+<div class="text">
+    <h1>
+        <img src="https://i.ibb.co/F4xgfcH/Logotipo-de-Banda-en-Negro-Naranja-y-Beis-con-L-neas.png" alt="OrquesYa" width="300" height="300">
+        MelodyMatch!
+    </h1>
 </div>
+</div>
+
 
 
 

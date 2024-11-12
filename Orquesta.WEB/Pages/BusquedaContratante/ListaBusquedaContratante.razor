@@ -9,17 +9,27 @@
 <GenericList MyList="Agrupaciones">
        <Body>
         <tbody>
-            @foreach (var item in Agrupaciones!)
-            {
-                <tr>
-                <td><img src="@GetUserPhoto(item.RepresentanteId)" width="80" height="80" style="border-radius:50%" /></td>
-                    <td>@item.Name</td>
-                    <td>@GetGeneroMusicalName(item.Id)</td>
-                    <td>
-                        <a href="/" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square" />Ver Perfil</a>
-                    </td>
-                </tr>
-            }
+             <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Agrupaciones!)
+                    {
+                        <tr>
+                       @*  <td><img src="@GetUserPhoto(item.RepresentanteId)" width="80" height="80" style="border-radius:50%" /></td> *@
+                            <td>@item.Name</td>
+                            <td>@GetGeneroMusicalName(item.Id)</td>
+                            <td>
+                            <a href="perfilAgrupacion" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square" />Ver Perfil</a>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+            </table>
         </tbody>
      </Body>
  </GenericList>
