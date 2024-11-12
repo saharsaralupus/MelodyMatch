@@ -1,4 +1,5 @@
-﻿﻿@using Orquesta.Shared.Entities
+﻿@using CurrieTechnologies.Razor.SweetAlert2
+﻿@using Orquesta.Shared.Entities
 @inject SweetAlertService swal
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation"></NavigationLock>
@@ -9,23 +10,30 @@
     <div class="mb-3">
         <label>Nombre Agrupacion</label>
         <div>
-            <InputText class="form-control" @bind-Value="AgrupacionSolista.Name" />
-            <ValidationMessage For="@(()=>AgrupacionSolista.Name)" />
+            <InputText class="form-control" @bind-Value="Agrupacion.Name" />
+            <ValidationMessage For="@(()=>Agrupacion.Name)" />
+        </div>
+    </div>
+	    <div class="mb-3">
+        <label>Descripción</label>
+        <div>
+            <InputText class="form-control" @bind-Value="Agrupacion.Description" />
+            <ValidationMessage For="@(()=>Agrupacion.Description)" />
         </div>
     </div>
     <div class="mb-3">
         <label>Precio por hora</label>
         <div>
-            <InputNumber class="form-control" @bind-Value="AgrupacionSolista.Price_Hour" />
-            <ValidationMessage For="@(()=>AgrupacionSolista.Price_Hour)" />
+            <InputNumber class="form-control" @bind-Value="Agrupacion.Price_Hour" />
+            <ValidationMessage For="@(()=>Agrupacion.Price_Hour)" />
         </div>
     </div>
 
     <div class="mb-3">
         <label>Representante Id:</label>
         <div>
-            <InputNumber class="form-control" @bind-Value="AgrupacionSolista.RepresentanteId" />
-            <ValidationMessage For="@(()=>AgrupacionSolista.RepresentanteId)" />
+            <InputNumber class="form-control" @bind-Value="Agrupacion.RepresentanteId" />
+            <ValidationMessage For="@(()=>Agrupacion.RepresentanteId)" />
         </div>
     </div>
 
@@ -40,17 +48,17 @@
 	private EditContext editContext = null;
 	protected override void OnInitialized()
 	{
-		editContext = new(AgrupacionSolista);
+
+		editContext = new(Agrupacion);
+
 	}
 
 	[EditorRequired]
 	[Parameter]
-
-	public Agrupacion AgrupacionSolista { get; set; }
+	public Agrupacion Agrupacion { get; set; }
 
 	[EditorRequired]
 	[Parameter]
-
 	public EventCallback OnSubmit { get; set; }
 
 	[EditorRequired]

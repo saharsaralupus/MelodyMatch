@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace Orquesta.API.Controllers
 {
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+   // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("/api/agrupacion")]
     public class AgrupacionController : ControllerBase
     {
