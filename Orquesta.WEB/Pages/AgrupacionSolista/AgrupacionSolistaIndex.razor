@@ -1,4 +1,4 @@
-﻿@page "/agrupacionSolista"
+﻿@page "/agrupacion"
 @using Orquesta.Shared.Entities
 @using Orquesta.WEB.Repositories
 @using Orquesta.WEB.Shared
@@ -10,14 +10,14 @@
     <div class="card-header">
         <span>
             <i class="bi bi-vinyl-fill" /> Agrupación/Solista
-            <a class="btn btn-primary btn-sm float-end" href="/agrupacionSolista/create"><i class="bi bi-plus-circle" /> Nueva Agrupacion</a>
+            <a class="btn btn-primary btn-sm float-end" href="/agrupacion/create"><i class="bi bi-plus-circle" /> Nueva Agrupacion</a>
 
         </span>
     </div>
 
     <div class="card-body">
 
-        <GenericList MyList="AgrupacionSolistas">
+        <GenericList MyList="Agrupacion">
 
             <Body>
                 <table class="table table-striped">
@@ -35,7 +35,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in AgrupacionSolistas!)
+                        @foreach (var item in Agrupacion!)
                         {
                             <tr>
                                 <td> @item.Id</td>
@@ -45,7 +45,7 @@
                                 
 
                                 <td>
-                                    <a href="/agrupacionSolista/edit/@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square" /> Editar</a>
+                                    <a href="/agrupacion/edit/@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square" /> Editar</a>
                                     <button @onclick=@(() => DeleteAsycn(item)) class="btn btn-sm btn-danger"><i class="bi bi-trash-fill" /> Borrar</button>
                                 </td>
                             </tr>
@@ -59,7 +59,7 @@
 
 
 @code {
-    public List<Agrupacion> AgrupacionSolistas { get; set; }
+    public List<Agrupacion> Agrupacion { get; set; }
     public List<Representante> Representantes { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -69,14 +69,14 @@
 
     private async Task LoadAsync()
     {
-        var responseHttp = await repository.GetAsync<List<Agrupacion>>("/api/agrupacionSolista");
+        var responseHttp = await repository.GetAsync<List<Agrupacion>>("/api/agrupacion");
         if (responseHttp.Error)
         {
             var message = await responseHttp.GetErrorMessageAsync();
             await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
             return;
         }
-        AgrupacionSolistas = responseHttp.Response;
+        Agrupacion = responseHttp.Response;
 
         var responseRepresentante = await repository.GetAsync<List<Representante>>("/api/representante");
         if (!responseRepresentante.Error)
@@ -107,12 +107,12 @@
             return;
         }
 
-        var responseHttp = await repository.DeleteAsync<Agrupacion>($"/api/agrupacionSolista/{agrupacionSolista.Id}");
+        var responseHttp = await repository.DeleteAsync<Agrupacion>($"/api/agrupacion/{agrupacionSolista.Id}");
         if (responseHttp.Error)
         {
             if (responseHttp.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                navigationManager.NavigateTo("AgrupacionSolista");
+                navigationManager.NavigateTo("agrupacion");
             }
             else
             {

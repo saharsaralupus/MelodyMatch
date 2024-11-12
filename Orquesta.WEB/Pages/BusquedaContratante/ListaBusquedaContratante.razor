@@ -1,0 +1,87 @@
+﻿@page "/listabusqueda"
+@using Orquesta.Shared.Entities
+@using Orquesta.WEB.Repositories
+@using Orquesta.WEB.Shared
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+
+<GenericList MyList="Agrupaciones">
+       <Body>
+        <tbody>
+            @foreach (var item in Agrupaciones!)
+            {
+                <tr>
+                <td><img src="@GetUserPhoto(item.RepresentanteId)" width="80" height="80" style="border-radius:50%" /></td>
+                    <td>@item.Name</td>
+                    <td>@GetGeneroMusicalName(item.Id)</td>
+                    <td>
+                        <a href="/" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square" />Ver Perfil</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+     </Body>
+ </GenericList>
+
+@code {
+    public List<Agrupacion_Genero> AgrupacionGeneros { get; set; }
+    public List<Agrupacion> Agrupaciones { get; set; }
+    public List<GeneroMusical> GeneroMusicals { get; set; }
+    public List<User> Users { get; set; }
+    public List<Representante> Representantes { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.GetAsync<List<Agrupacion_Genero>>("/api/agrupacionGenero");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+        AgrupacionGeneros = responseHttp.Response;
+
+        var responseAgrupacion = await repository.GetAsync<List<Agrupacion>>("api/agrupacion");
+        if (!responseAgrupacion.Error)
+        {
+            Agrupaciones = responseAgrupacion.Response;
+        }
+
+        var responseGeneroMusical = await repository.GetAsync<List<GeneroMusical>>("api/generoMusical");
+        if (!responseGeneroMusical.Error)
+        {
+            GeneroMusicals = responseGeneroMusical.Response;
+        }
+    }
+
+    private void NavigateToBusqueda()
+    {
+        navigationManager.NavigateTo("/listabusqueda");
+    }
+
+    private string GetUserPhoto(int RepresentanteId)
+    {
+        var representante = Representantes.FirstOrDefault(i => i.Id == RepresentanteId);
+        var user = Users.FirstOrDefault(i => i.Document == representante.Document);
+        return user != null ? user.Photo : "Foto no encontrada";
+    }
+
+    private string GetAgrupacionSolistaName(int AgrupacionId)
+    {
+        var agrupacion = Agrupaciones.FirstOrDefault(i => i.Id == AgrupacionId);
+        return agrupacion != null ? agrupacion.Name : "Agrupación no encontrado";
+    }
+
+    private string GetGeneroMusicalName(int AgrupacionId)
+    {
+        var generoMusical = GeneroMusicals.FirstOrDefault(i => i.Id == AgrupacionId);
+        return generoMusical != null ? generoMusical.Name : "Género no encontrado";
+    }
+
+}

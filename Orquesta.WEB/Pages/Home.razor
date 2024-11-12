@@ -1,4 +1,12 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@using Orquesta.Shared.Entities
+@using Orquesta.WEB.Repositories
+@using Orquesta.WEB.Shared
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+
 
  <style>
     /* Contenedor de título e imagen */
@@ -58,10 +66,101 @@
         color: black;
     }
 
+
+
+    /* ---------------------------- */
+    .image-container {
+        position: relative;
+        width: 300px;
+        height: 300px;
+    }
+
+    .content-inline {
+        width: 35%;
+        position: absolute;
+        left: 60%;
+        top: 30%;
+        transform: translate(-50%, -50%);
+        display: inline-block;
+    }
+
+    .search-inline {
+        width: 100%;
+        position: relative;
+        display: flex;
+    }
+
+    .search-inline--input {
+        width: 100%;
+        padding: 10px 10px 10px 40px; /* Espacio para el icono */
+        border: 1px solid #222222;
+        border-radius: 20px;
+        outline: none;
+        color: #222222;
+        font-size: 20px;
+    }
+
+    .my-button {
+        padding: 10px 20px;
+        background-color: wheat;
+        color: black;
+        font-family: 'Sans-serif';
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+        .my-button:hover {
+            background-color: antiquewhite;
+        }
+
+    h3{
+        font-family: 'Sans-serif';
+        color: black;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 10px;
+        top: 20%;
+        font-size: 1.2em;
+        color: #222222;
+    }
+
+    .scrollable-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        display: block;
+        background:#000000;
+        opacity: 0.01;
+    }
+
+
 </style>
 
 <div class="title-and-image-container">
     <div>
+       <AuthorizeView Roles="Admin, UserContratante">
+            <Authorized>
+                <!-- Barra de búsqueda -->
+                <div class="content-inline">
+                   @*<div class="search-inline">              
+                        <input name="txtSearch" class="search-inline--input" placeholder="Buscar">
+                        <i class="bi bi-search search-icon"></i>
+                    </div>*@
+                    <h3>¡ENCUENTRA TU ORQUESTA IDEAL!</h3>
+                    <span>
+                        <td>
+                            <i class="bi bi-music-note-beamed"/>
+                            <a class="btn btn-primary btn-sm float-end" href="listabusqueda"> Clic Aquí!</a>
+                        </td>
+                    </span>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
+        <!-- Imagen -->
         <img class="scrollable-image" src="https://images.pexels.com/photos/995301/pexels-photo-995301.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="OrquesYa" width="300" height="300">
     </div>
     <div class="text">

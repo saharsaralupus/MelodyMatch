@@ -1,4 +1,4 @@
-﻿@page "/agrupacionSolista/edit/{Id:int}"
+﻿@page "/agrupacion/edit/{Id:int}"
 @using System.Net
 @using CurrieTechnologies.Razor.SweetAlert2
 @inject NavigationManager navigationManager
@@ -25,12 +25,12 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        var responseHttp = await repository.GetAsync<Agrupacion>($"/api/agrupacionSolista/{Id}");
+        var responseHttp = await repository.GetAsync<Agrupacion>($"/api/agrupacion/{Id}");
         if (responseHttp.Error)
         {
             if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
             {
-                navigationManager.NavigateTo("/agrupacionSolista");
+                navigationManager.NavigateTo("/agrupacion");
             }
             else
             {
@@ -47,7 +47,7 @@ else
 
     private async Task Editar()
     {
-        var responseHttp = await repository.PutAsync("/api/agrupacionSolista", agrupacionSolista);
+        var responseHttp = await repository.PutAsync("/api/agrupacion", agrupacionSolista);
         if (responseHttp.Error)
         {
             var message = await responseHttp.GetErrorMessageAsync();
@@ -69,7 +69,7 @@ else
     private void Return()
     {
         agrupacionSolistaForm!.FormPostedSuccessfully = true;
-        navigationManager.NavigateTo("/agrupacionSolista");
+        navigationManager.NavigateTo("/agrupacion");
     }
 
 }
