@@ -184,6 +184,28 @@
     private List<GeneroMusical> GeneroMusicals { get; set; }
     public List<Agrupacion> Agrupaciones { get; set; }
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.GetAsync<List<Agrupacion_Genero>>("/api/agrupacionGenero");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+        AgrupacionGeneros = responseHttp.Response;
+
+        var responseRepresentante = await repository.GetAsync<List<GeneroMusical>>("/api/generoMusical");
+        if (!responseRepresentante.Error)
+        {
+            GeneroMusicals = responseRepresentante.Response;
+        }
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -208,9 +230,19 @@
 
     private string GetGeneroMusicalName(int AgrupacionId)
     {
-       var agrupaciongenero = AgrupacionGeneros.FirstOrDefault(i => i.AgrupacionId == AgrupacionId);
-        return Console.WriteLine("Hola " + agrupaciongenero);
-    //     var generoMusical = GeneroMusicals.FirstOrDefault(i => i.Id == agrupaciongenero.GeneroMusicalId);
-    // return generoMusical != null ? generoMusical.Name : "Género no encontrado";
+        if (AgrupacionGeneros == null || GeneroMusicals == null)
+        {
+            return "Datos no disponibles"; // O cualquier mensaje que consideres apropiado
+        }
+
+        var agrupaciongenero = AgrupacionGeneros.FirstOrDefault(i => i.AgrupacionId == AgrupacionId);
+        if (agrupaciongenero == null)
+        {
+            return "Género no encontrado";
+        }
+
+        var generoMusical = GeneroMusicals.FirstOrDefault(i => i.Id == agrupaciongenero.GeneroMusicalId);
+        return generoMusical != null ? generoMusical.Name : "Género no encontrado";
     }
+
 }
