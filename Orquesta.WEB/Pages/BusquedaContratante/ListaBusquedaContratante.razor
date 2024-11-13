@@ -24,7 +24,7 @@
                             <td>@item.Name</td>
                             <td>@GetGeneroMusicalName(item.Id)</td>
                             <td>
-                            <a href="perfilAgrupacion" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square" />Ver Perfil</a>
+                            <a href="perfilAgrupacion/@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"/>Ver Perfil</a>
                             </td>
                         </tr>
                     }
@@ -90,7 +90,8 @@
 
     private string GetGeneroMusicalName(int AgrupacionId)
     {
-        var generoMusical = GeneroMusicals.FirstOrDefault(i => i.Id == AgrupacionId);
+        var agrupaciongenero = AgrupacionGeneros.FirstOrDefault(i => i.AgrupacionId == AgrupacionId);
+        var generoMusical = GeneroMusicals.FirstOrDefault(i => i.Id == agrupaciongenero.GeneroMusicalId);
         return generoMusical != null ? generoMusical.Name : "Género no encontrado";
     }
 
