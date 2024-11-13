@@ -30,4 +30,8 @@
     <ProjectReference Include="..\Orquesta.Shared\Orquesta.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\imagenes\users\" />
+  </ItemGroup>
+
 </Project>

@@ -82,6 +82,9 @@ builder.Services.AddScoped<IMailHelper, MailHelper>();
 
 builder.Services.AddScoped<IFileStorage, FileStorage>();
 
+
+
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(x => x.TokenValidationParameters = new TokenValidationParameters
 {
@@ -121,7 +124,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

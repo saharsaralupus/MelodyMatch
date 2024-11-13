@@ -2,42 +2,66 @@
 using System.IO;
 using System.Threading.Tasks;
 using System;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
 
 namespace Orquesta.API.Helpers
 {
     public class FileStorage : IFileStorage
     {
-        private readonly string connectionString;
+        private readonly string localDirectoryPath;
+
         public FileStorage(IConfiguration configuration)
         {
-            connectionString = configuration.GetConnectionString("AzureStorage")!;
+            // Define la carpeta donde se guardarán las imágenes localmente.
+            localDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "imagenes");
+
+            // Asegúrate de que la carpeta existe.
+            if (!Directory.Exists(localDirectoryPath))
+            {
+                Directory.CreateDirectory(localDirectoryPath);
+            }
+        }
+
+        public async Task<string> SaveFileAsync(byte[] content, string extension, string containerName)
+        {
+            // Genera un nombre único para el archivo
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            var fullPath = Path.Combine(localDirectoryPath, containerName, fileName);
+
+            // Crea la carpeta del contenedor si no existe
+            var containerPath = Path.Combine(localDirectoryPath, containerName);
+            if (!Directory.Exists(containerPath))
+            {
+                Directory.CreateDirectory(containerPath);
+            }
+
+            // Guarda el archivo en la ruta local
+            await File.WriteAllBytesAsync(fullPath, content);
+
+            // Devuelve la URL relativa
+            return $"/imagenes/{containerName}/{fileName}";
         }
 
         public async Task RemoveFileAsync(string path, string containerName)
         {
-            var client = new BlobContainerClient(connectionString, containerName);
-            await client.CreateIfNotExistsAsync();
             var fileName = Path.GetFileName(path);
-            var blob = client.GetBlobClient(fileName);
-            await blob.DeleteIfExistsAsync();
-        }
+            var fullPath = Path.Combine(localDirectoryPath, containerName, fileName);
 
-        public async Task<string> SaveFileAsync(byte[] content, string extention, string containerName)
-        {
-            var client = new BlobContainerClient(connectionString, containerName);
-            await client.CreateIfNotExistsAsync();
-            client.SetAccessPolicy(PublicAccessType.Blob);
-            var fileName = $"{Guid.NewGuid()}{extention}";
-            var blob = client.GetBlobClient(fileName);
-
-            using (var ms = new MemoryStream(content))
+            if (File.Exists(fullPath))
             {
-                await blob.UploadAsync(ms);
+                File.Delete(fullPath);
             }
 
-            return blob.Uri.ToString();
+            await Task.CompletedTask;
+        }
+
+        public async Task<string> EditFileAsync(byte[] content, string extension, string containerName, string path)
+        {
+            if (!string.IsNullOrEmpty(path))
+            {
+                await RemoveFileAsync(path, containerName);
+            }
+
+            return await SaveFileAsync(content, extension, containerName);
         }
     }
 }

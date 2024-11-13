@@ -69,13 +69,16 @@ namespace Orquesta.API.Controllers
         public async Task<ActionResult> CreateUser([FromBody] UserDTO model)
         {
             User user = model;
-            if (!string.IsNullOrEmpty(model.Photo))
+            if(!string.IsNullOrEmpty(model.Photo))
             {
                 var photoUser = Convert.FromBase64String(model.Photo);
-                model.Photo = await _fileStorage.SaveFileAsync(photoUser, ".jpg", _container);
+
+                // Guardar la imagen en la carpeta wwwroot/imagenes
+                var imageUrl = await _fileStorage.SaveFileAsync(photoUser, ".jpg", "users");
+
+                // Ahora puedes guardar la URL en la base de datos (solo la ruta relativa)
+                model.Photo = imageUrl;
             }
-
-
 
             var result = await _userHelper.AdduserAsync(user, model.Password);
             try

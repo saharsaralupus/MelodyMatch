@@ -67,7 +67,8 @@ else
                                 @foreach (var user in Users)
                                 {
                                     <tr>
-                                        <td><img src="@user.Photo" width="80" height="80" style="border-radius:50%" /></td>
+                                <img src="https://localhost:7000/@user.Photo" width="80" height="80" style="border-radius:50%" />
+
                                         <td>@user.FullName</td>
                                         <td>@user.Document</td>
                                         <td>@user.PhoneNumber</td>

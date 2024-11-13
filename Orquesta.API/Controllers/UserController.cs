@@ -13,8 +13,6 @@ using System.Threading.Tasks;
 namespace Orquesta.API.Controllers
 {
 
-
-
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("/api/Users")]
