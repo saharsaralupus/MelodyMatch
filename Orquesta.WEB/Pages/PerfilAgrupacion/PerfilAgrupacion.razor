@@ -128,52 +128,58 @@
 
 </style>
 
-
-
-  <div class="header-image">
+<div class="header-image">
     <img src="https://musicanddynamics.com/wp-content/uploads/2021/04/clases-de-lenguaje-musical.jpeg" alt="Orquesta">
-        </div>
+</div>
 
-        <div class="profile-content">
-            <div class="profile-info">
-        <img class="profile-pic" src="https://live.staticflickr.com/3542/3661289018_8aae162a56_c.jpg" alt="Foto del artista">
-                <div class="profile-text">
+@if (agrupacion != null)
+{
+    <div class="profile-content">
+        <div class="profile-info">
+            <img class="profile-pic" src="https://live.staticflickr.com/3542/3661289018_8aae162a56_c.jpg" alt="Foto del artista">
+            <div class="profile-text">
                 <h2>@agrupacion.Name</h2>
                 <h1 class="genre">@GetGeneroMusicalName(agrupacion.Id)</h1>
-                    <button class="reserve-button">Reservar</button>
+                <button class="reserve-button">Reservar</button>
+            </div>
+        </div>
+
+        <div class="description">
+            <h3>Descripción</h3>
+            <p>Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500, cuando un impresor (N. del T.</p>
+            <p><strong>Precio / hora:</strong> @agrupacion.Price_Hour</p>
+            <button class="repertoire-button">Conoce nuestro repertorio</button>
+        </div>
+
+        <div class="ratings">
+            <h3>Calificaciones</h3>
+            <div class="ratings-summary">
+                <div class="stars-summary">
+                    <span>⭐⭐⭐⭐⭐</span> 1<br>
+                    <span>⭐⭐⭐⭐</span> 1<br>
+                    <span>⭐⭐⭐</span> 0<br>
+                    <span>⭐⭐</span> 0<br>
+                    <span>⭐</span> 1<br>
                 </div>
             </div>
-
-            <div class="description">
-                <h3>Descripción</h3>
-                <p>Lorem Ipsum es simplemente el texto de relleno de las imprentas y archivos de texto. Lorem Ipsum ha sido el texto de relleno estándar de las industrias desde el año 1500, cuando un impresor (N. del T.</p>
-        <p><strong>Precio / hora:</strong>@agrupacion.Price_Hour</p>
-                <button class="repertoire-button">Conoce nuestro repertorio</button>
-            </div>
-
-            <div class="ratings">
-                <h3>Calificaciones</h3>
-                <div class="ratings-summary">
-                    <div class="stars-summary">
-                        <span>⭐⭐⭐⭐⭐</span> 1<br>
-                        <span>⭐⭐⭐⭐</span> 1<br>
-                        <span>⭐⭐⭐</span> 0<br>
-                        <span>⭐⭐</span> 0<br>
-                        <span>⭐</span> 1<br>
-                    </div>
+            <div class="ratings-list">
+                <div class="rating">
+                    <div class="stars">⭐⭐⭐⭐⭐</div>
+                    <p>Lorem ipsum dolor sit amet. Eos Quis architecto sed doloribus sunt et animi iste ut animi quib…</p>
                 </div>
-                <div class="ratings-list">
-                    <div class="rating">
-                        <div class="stars">⭐⭐⭐⭐⭐</div>
-                        <p>Lorem ipsum dolor sit amet. Eos Quis architecto sed doloribus sunt et animi iste ut animi quib…</p>
-                    </div>
-                    <div class="rating">
-                        <div class="stars">⭐⭐⭐⭐</div>
-                        <p>Lorem ipsum dolor sit amet. Eos Quis architecto sed doloribus sunt et animi iste ut animi quib…</p>
-                    </div>
+                <div class="rating">
+                    <div class="stars">⭐⭐⭐⭐</div>
+                    <p>Lorem ipsum dolor sit amet. Eos Quis architecto sed doloribus sunt et animi iste ut animi quib…</p>
                 </div>
             </div>
         </div>
+    </div>
+}
+else
+{
+    <p>Cargando datos...</p>
+}
+
 
 @code {
     [Parameter]
