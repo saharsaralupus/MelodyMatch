@@ -155,23 +155,33 @@
             <h3>Calificaciones</h3>
             <div class="ratings-summary">
                 <div class="stars-summary">
-                    <span>⭐⭐⭐⭐⭐</span> 1<br>
+                    <span>⭐⭐⭐⭐⭐</span> i<br>
                     <span>⭐⭐⭐⭐</span> 1<br>
                     <span>⭐⭐⭐</span> 0<br>
                     <span>⭐⭐</span> 0<br>
                     <span>⭐</span> 1<br>
                 </div>
             </div>
-            <div class="ratings-list">
-                <div class="rating">
-                    <div class="stars">⭐⭐⭐⭐⭐</div>
-                    <p>Lorem ipsum dolor sit amet. Eos Quis architecto sed doloribus sunt et animi iste ut animi quib…</p>
+            <GenericList MyList="Calificacion_Agrupaciones">
+                <Body>
+                <div class="ratings-list">
+                        @foreach (var item in Calificacion_Agrupaciones!)
+                        {
+                            @if (item.AgrupacionId == agrupacion.Id)
+                            {
+                                <div class="rating">
+                                    @if (item.Puntaje == 5)
+                                    {
+                                        <div class="stars">⭐⭐⭐⭐</div>
+                                    }
+                                    <p>@item.Comentario</p>
+                                </div>
+                            }
+                            
+                     }
                 </div>
-                <div class="rating">
-                    <div class="stars">⭐⭐⭐⭐</div>
-                    <p>Lorem ipsum dolor sit amet. Eos Quis architecto sed doloribus sunt et animi iste ut animi quib…</p>
-                </div>
-            </div>
+            </Body>
+            </GenericList>
         </div>
     </div>
 }
@@ -185,9 +195,11 @@ else
     [Parameter]
     public int Id { get; set; }
 
-    private Agrupacion agrupacion;
+    public Agrupacion agrupacion;
     private List<Agrupacion_Genero> AgrupacionGeneros { get; set; }
     private List<GeneroMusical> GeneroMusicals { get; set; }
+    private List<Calificacion_Agrupacion> Lista_Filtrada { get; set; }
+    private List<Calificacion_Agrupacion> Calificacion_Agrupaciones { get; set; } 
     public List<Agrupacion> Agrupaciones { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -211,6 +223,13 @@ else
         {
             GeneroMusicals = responseRepresentante.Response;
         }
+
+        var responseCalificacionAgrupacion = await repository.GetAsync<List<Calificacion_Agrupacion>>("/api/calificacion_agrupacion");
+        if (!responseCalificacionAgrupacion.Error)
+        {
+            Calificacion_Agrupaciones = responseCalificacionAgrupacion.Response;
+        }
+     
     }
 
     protected override async Task OnParametersSetAsync()
@@ -233,6 +252,7 @@ else
             agrupacion = responseHttp.Response;
         }
     }
+
 
     private string GetGeneroMusicalName(int AgrupacionId)
     {

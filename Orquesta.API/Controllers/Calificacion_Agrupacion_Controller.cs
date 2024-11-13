@@ -11,7 +11,7 @@ namespace Orquesta.API.Controllers
 {
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [Route("/api/califiacion_agrupacion")]
+    [Route("/api/calificacion_agrupacion")]
     public class Calificacion_Agrupacion_Controller : ControllerBase
     {
 

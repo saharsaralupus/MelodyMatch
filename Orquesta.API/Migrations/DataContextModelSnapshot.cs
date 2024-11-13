@@ -223,12 +223,20 @@ namespace Orquesta.API.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<int?>("ContratanteId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ContratateId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Puntaje")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AgrupacionId");
+
+                    b.HasIndex("ContratanteId");
 
                     b.ToTable("Calificaciones_Agrupacion");
                 });
@@ -603,7 +611,13 @@ namespace Orquesta.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Orquesta.Shared.Entities.Contratante", "Contratante")
+                        .WithMany("Calificaciones_Agrupacion")
+                        .HasForeignKey("ContratanteId");
+
                     b.Navigation("Agrupacion");
+
+                    b.Navigation("Contratante");
                 });
 
             modelBuilder.Entity("Orquesta.Shared.Entities.Calificacion_Contratante", b =>
@@ -669,6 +683,8 @@ namespace Orquesta.API.Migrations
 
             modelBuilder.Entity("Orquesta.Shared.Entities.Contratante", b =>
                 {
+                    b.Navigation("Calificaciones_Agrupacion");
+
                     b.Navigation("Calificaciones_Contratante");
 
                     b.Navigation("Reservaciones");

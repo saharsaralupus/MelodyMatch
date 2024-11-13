@@ -26,5 +26,9 @@ namespace Orquesta.Shared.Entities
         public Agrupacion Agrupacion { get; set; }
         public int AgrupacionId { get; set; }
 
+        [JsonIgnore]
+        public Contratante Contratante { get; set; }
+        public int ContratanteId { get; set; }
+
     }
 }

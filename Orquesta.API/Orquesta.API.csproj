@@ -27,10 +27,4 @@
 		<ProjectReference Include="..\Orquesta.WEB\Orquesta.WEB.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Migrations\" />
-	  <Folder Include="wwwroot\" />
-	  <Folder Include="wwwroot\imagenes\users\" />
-	</ItemGroup>
-
 </Project>

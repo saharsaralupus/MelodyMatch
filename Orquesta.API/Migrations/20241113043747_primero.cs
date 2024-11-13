@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Orquesta.API.Migrations
 {
     /// <inheritdoc />
-    public partial class Inicial : Migration
+    public partial class primero : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -283,7 +283,9 @@ namespace Orquesta.API.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Puntaje = table.Column<int>(type: "int", nullable: false),
                     Comentario = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    AgrupacionId = table.Column<int>(type: "int", nullable: false)
+                    AgrupacionId = table.Column<int>(type: "int", nullable: false),
+                    ContratanteId = table.Column<int>(type: "int", nullable: true),
+                    ContratateId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -294,6 +296,11 @@ namespace Orquesta.API.Migrations
                         principalTable: "Agrupaciones",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Calificaciones_Agrupacion_Contratantes_ContratanteId",
+                        column: x => x.ContratanteId,
+                        principalTable: "Contratantes",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -425,6 +432,11 @@ namespace Orquesta.API.Migrations
                 name: "IX_Calificaciones_Agrupacion_AgrupacionId",
                 table: "Calificaciones_Agrupacion",
                 column: "AgrupacionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Calificaciones_Agrupacion_ContratanteId",
+                table: "Calificaciones_Agrupacion",
+                column: "ContratanteId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Calificaciones_Contratante_ContratanteId",
