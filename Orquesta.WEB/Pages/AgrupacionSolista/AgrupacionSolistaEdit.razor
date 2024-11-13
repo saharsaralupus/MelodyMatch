@@ -7,20 +7,20 @@
 
 <h3>Editar</h3>
 
-@if (agrupacionSolista is null)
+@if (agrupacion is null)
 {
     <p>Cargando...</p>
 }
 else
 {
-    <AgrupacionSolistaForm @ref="agrupacionSolistaForm" AgrupacionSolista="agrupacionSolista" OnSubmit="Editar" ReturnAction="Return" />
+    <AgrupacionSolistaForm @ref="agrupacionSolistaForm" Agrupacion="agrupacion" OnSubmit="Editar" ReturnAction="Return" />
 
 }
 
 @code {
     [Parameter]
     public int Id { get; set; }
-    private Agrupacion agrupacionSolista;
+    private Agrupacion agrupacion;
     private AgrupacionSolistaForm agrupacionSolistaForm;
 
     protected override async Task OnParametersSetAsync()
@@ -40,14 +40,14 @@ else
         }
         else
         {
-            agrupacionSolista = responseHttp.Response;
+            agrupacion = responseHttp.Response;
         }
     }
 
 
     private async Task Editar()
     {
-        var responseHttp = await repository.PutAsync("/api/agrupacion", agrupacionSolista);
+        var responseHttp = await repository.PutAsync("/api/agrupacion", agrupacion);
         if (responseHttp.Error)
         {
             var message = await responseHttp.GetErrorMessageAsync();
