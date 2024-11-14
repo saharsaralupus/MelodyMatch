@@ -91,7 +91,7 @@
         {
             Contratantes = responseContratante.Response;
         }
-        var responseAgrupacionSolista = await repository.GetAsync<List<Agrupacion>>("/api/agrupacionSolista");
+        var responseAgrupacionSolista = await repository.GetAsync<List<Agrupacion>>("/api/agrupacion");
         if (!responseAgrupacionSolista.Error)
         {
             AgrupacionSolistas = responseAgrupacionSolista.Response;

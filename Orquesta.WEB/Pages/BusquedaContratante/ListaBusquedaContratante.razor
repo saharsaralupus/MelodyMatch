@@ -215,12 +215,6 @@
         return user != null ? user.Photo : "Foto no encontrada";
     }
 
-    private string GetAgrupacionSolistaName(int AgrupacionId)
-    {
-        var agrupacion = Agrupaciones.FirstOrDefault(i => i.Id == AgrupacionId);
-        return agrupacion != null ? agrupacion.Name : "Agrupación no encontrado";
-    }
-
     private string GetGeneroMusicalName(int AgrupacionId)
     {
         var agrupaciongenero = AgrupacionGeneros.FirstOrDefault(i => i.AgrupacionId == AgrupacionId);
