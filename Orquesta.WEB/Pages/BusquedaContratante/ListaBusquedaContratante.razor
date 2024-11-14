@@ -6,31 +6,164 @@
 @inject SweetAlertService sweetAlertService
 @inject NavigationManager navigationManager
 
+
+<style>
+
+    .header-image img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+    }
+
+    .table table-striped{
+
+    }
+
+    /* Contenedor de título e imagen */
+    .title-and-image-container {
+        text-align: center;
+        color: white;
+        font-family: 'Brush Script MT', cursive;
+    }
+
+    /* Estilo de título y logo */
+    .title-and-image-container h1 {
+        font-size: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .title-and-image-container h1 img {
+        margin-right: 20px;
+    }
+
+    .content-inline {
+        width: 35%;
+        position: absolute;
+        left: 60%;
+        top: 20%;
+        transform: translate(-50%, -50%);
+        display: inline-block;
+    }
+
+    .search-inline {
+        width: 100%;
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 15px; /* Posición del icono */
+        color: #888; /* Color del icono */
+        font-size: 18px;
+    }
+
+
+    .search-inline--input {
+        width: 100%;
+        padding: 10px 15px 10px 40px; /* Espacio para el icono */
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        outline: none;
+        font-size: 16px;
+        font-family: 'Sans-serif', Arial, sans-serif;
+        color: #333;
+        background-color: #f9f9f9;
+        transition: all 0.3s ease;
+    }
+
+        .search-inline--input::placeholder {
+            color: #aaa;
+        }
+
+    .profile-content {
+        padding: 20px;
+        width: 100%;
+        background-color: #f5f5f5; /* Fondo para destacar cada perfil */
+        margin-bottom: 10px; /* Separación entre perfiles */
+        border-radius: 8px; /* Borde redondeado */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    }
+
+    .profile-pic2 {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .profile-info {
+        display: flex;
+        align-items: center;
+        gap: 50px;
+        width: 100%;
+    }
+
+    .profile-text h2 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+        color: #333;
+        font-family: sans-serif;
+    }
+
+    .genre {
+        font-size: 1em;
+        color: #777;
+    }
+
+    .agrupaciones-list {
+        width: 100%;
+    }
+
+    .btn-warning {
+        padding: 8px 12px;
+        border-radius: 5px;
+        text-decoration: none;
+        color: brown;
+        margin-left: auto;
+    }
+    
+</style>
+
 <GenericList MyList="Agrupaciones">
        <Body>
-        <tbody>
-             <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var item in Agrupaciones!)
-                    {
-                        <tr>
-                       @*  <td><img src="@GetUserPhoto(item.RepresentanteId)" width="80" height="80" style="border-radius:50%" /></td> *@
-                            <td>@item.Name</td>
-                            <td>@GetGeneroMusicalName(item.Id)</td>
-                            <td>
-                            <a href="perfilAgrupacion/@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"/>Ver Perfil</a>
-                            </td>
-                        </tr>
-                    }
-                    </tbody>
-            </table>
-        </tbody>
+        <div class="header-image">
+                <AuthorizeView Roles="Admin, UserContratante">
+                    <Authorized>
+                        <!-- Barra de búsqueda -->
+                        <div class="title-and-image-container">
+                        <div class="content-inline">
+                            <div class="search-inline">
+                                <i class="bi bi-search search-icon"></i>
+                                <input name="txtSearch" class="search-inline--input" placeholder="Buscar">
+                            </div>
+                        </div>
+                        <!-- Imagen -->
+                <img class="profile-pic" src="https://images.unsplash.com/photo-1527606432722-8b1422ce77a1?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="OrquesYa">
+                </div>
+                </Authorized>
+            </AuthorizeView>
+       </div>
+        
+                    <div class="agrupaciones-list">
+                            @foreach (var item in Agrupaciones!)
+                            {
+                            <div class="profile-content">
+                                <div class="profile-info">
+                                    <img class="profile-pic2" src="https://live.staticflickr.com/3542/3661289018_8aae162a56_c.jpg" alt="Foto del artista">
+                                    <div class="profile-text">
+                                        <h2>@item.Name</h2>
+                                        <h1 class="genre">@GetGeneroMusicalName(item.Id)</h1>
+                                        <a href="perfilAgrupacion/@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i> Ver Perfil</a>
+                                    </div>
+                                </div>
+                            </div>
+                            }
+                    </div>
+
      </Body>
  </GenericList>
 

@@ -1,0 +1,154 @@
+﻿@page "/procesoReservacion"
+@using System.ComponentModel.DataAnnotations
+
+<h3>ProcesoReservacion</h3>
+
+<style>
+    .calendar-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 500px;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .day-header, .day-cell {
+        text-align: center;
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .day-cell {
+        cursor: pointer;
+    }
+
+        .day-cell:hover {
+            background-color: #f0f0f0;
+        }
+
+    .reservation-details {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .reserve-button {
+        background-color: green;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+</style>
+
+
+<div class="calendar-container">
+    <div class="calendar-header">
+        <button @onclick="PreviousMonth">←</button>
+        <span>@currentMonth.ToString("MMMM yyyy")</span>
+        <button @onclick="NextMonth">→</button>
+    </div>
+
+    <div class="calendar-grid">
+        @foreach (var day in daysOfWeek)
+        {
+            <div class="day-header">@day</div>
+        }
+        @foreach (var day in monthDays)
+        {
+            <div class="day-cell" @onclick="() => SelectDate(day)">
+                @day.Day
+            </div>
+        }
+    </div>
+    
+    <div class="reservation-details">
+        <h4>Hora y duración</h4>
+        <input type="time" @bind="StartTime" /> 
+        <input type="time" @bind="FinalTime" />
+
+        <h4>Dirección</h4>
+        <input type="text" @bind="Place" placeholder="Ingrese lugar..." />
+
+        <button class="reserve-button" @onclick="Reserve">Reservar</button>
+    </div>
+</div>
+
+@code {
+    private DateTime currentMonth = DateTime.Now;
+    private DateTime selectedDate;
+    private List<DateTime> monthDays = new List<DateTime>();
+    private readonly string[] daysOfWeek = { "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo" };
+
+    [Required(ErrorMessage = "La hora de inicio es obligatoria")]
+    public TimeOnly StartTime { get; set; }
+
+    [Required(ErrorMessage = "La hora de finalización es obligatoria")]
+    public TimeOnly FinalTime { get; set; }
+
+    [Required(ErrorMessage = "La fecha es obligatoria")]
+    public DateOnly Fecha { get; set; }
+
+    [Required(ErrorMessage = "El lugar es obligatorio")]
+    public string Place { get; set; }
+
+    protected override void OnInitialized()
+    {
+        GenerateCalendarDays();
+    }
+
+    private void GenerateCalendarDays()
+    {
+        monthDays.Clear();
+        var daysInMonth = DateTime.DaysInMonth(currentMonth.Year, currentMonth.Month);
+        for (int day = 1; day <= daysInMonth; day++)
+        {
+            monthDays.Add(new DateTime(currentMonth.Year, currentMonth.Month, day));
+        }
+    }
+
+    private void SelectDate(DateTime date)
+    {
+        selectedDate = date;
+        Fecha = DateOnly.FromDateTime(date);
+        StateHasChanged();
+    }
+
+    private void PreviousMonth()
+    {
+        currentMonth = currentMonth.AddMonths(-1);
+        GenerateCalendarDays();
+    }
+
+    private void NextMonth()
+    {
+        currentMonth = currentMonth.AddMonths(1);
+        GenerateCalendarDays();
+    }
+
+    private void Reserve()
+    {
+        // Aquí puedes agregar la lógica para almacenar la reservación
+        Console.WriteLine($"Reservado para {Fecha} de {StartTime} a {FinalTime} en {Place}");
+    }
+}

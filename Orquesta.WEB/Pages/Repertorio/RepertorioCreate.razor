@@ -1,0 +1,53 @@
+﻿@page "/repertorio/create"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+<h3>RepertorioCreate</h3>
+
+<RepertorioForm @ref="repertorioForm" Repertorio="repertorio" OnSubmit="Create" ReturnAction="Return" />
+
+@code {
+
+	private Repertorio repertorio = new Repertorio();
+	private RepertorioForm repertorioForm;
+
+    private async Task Create()
+    {
+
+
+        var responseHttp = await repository.PostAsync("/api/repertorio", repertorio);
+        if (responseHttp.Error)
+        {
+
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+
+
+        }
+
+        Return();
+
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+
+                Toast = true,
+                Position = SweetAlertPosition.BottomEnd,
+                ShowConfirmButton = true,
+                Timer = 3000
+
+            });
+
+
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Registro creado con éxito");
+    }
+
+
+    private void Return()
+    {
+        repertorioForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/repertorio");
+
+    }
+}
