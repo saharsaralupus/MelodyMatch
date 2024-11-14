@@ -1,4 +1,4 @@
-﻿@page "/integrante/{Id:int}"
+﻿@page "/integrante"
 @using Orquesta.Shared.Entities
 @using Orquesta.WEB.Repositories
 @using Orquesta.WEB.Shared
@@ -58,7 +58,7 @@
 
 @code {
     public List<Integrante> Integrantes { get; set; }
-    public List<Agrupacion> AgrupacionSolistas { get; set; }
+    public List<Agrupacion> Agrupaciones { get; set; }
     
 
     protected override async Task OnInitializedAsync()
@@ -77,16 +77,16 @@
         }
         Integrantes = responseHttp.Response;
 
-        var responseAgrupacionSolista = await repository.GetAsync<List<Agrupacion>>("/api/agrupacionSolista");
+        var responseAgrupacionSolista = await repository.GetAsync<List<Agrupacion>>("/api/agrupacion");
         if (!responseAgrupacionSolista.Error)
         {
-            AgrupacionSolistas = responseAgrupacionSolista.Response;
+            Agrupaciones = responseAgrupacionSolista.Response;
         }
     }
 
     private string GetAgrupacionSolistaName(int AgrupacionSolistaId)
     {
-        var agrupacionSolista = AgrupacionSolistas.FirstOrDefault(i => i.Id == AgrupacionSolistaId);
+        var agrupacionSolista = Agrupaciones.FirstOrDefault(i => i.Id == AgrupacionSolistaId);
         return agrupacionSolista != null ? agrupacionSolista.Name : "Representante no encontrado";
     }
 
