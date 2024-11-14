@@ -1,154 +1,129 @@
 ﻿@page "/procesoReservacion"
+@using Orquesta.Shared.Entities
 @using System.ComponentModel.DataAnnotations
+@inject SweetAlertService swal
+
 
 <h3>ProcesoReservacion</h3>
 
-<style>
-    .calendar-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 20px;
-    }
+<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation"></NavigationLock>
 
-    .calendar-header {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        max-width: 500px;
-        margin-bottom: 20px;
-        font-size: 1.5em;
-    }
+<EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
 
-    .calendar-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 5px;
-        width: 100%;
-        max-width: 500px;
-    }
-
-    .day-header, .day-cell {
-        text-align: center;
-        padding: 10px;
-        border: 1px solid #ddd;
-    }
-
-    .day-cell {
-        cursor: pointer;
-    }
-
-        .day-cell:hover {
-            background-color: #f0f0f0;
-        }
-
-    .reservation-details {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-top: 20px;
-    }
-
-    .reserve-button {
-        background-color: green;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-top: 10px;
-    }
-
-</style>
-
-
-<div class="calendar-container">
-    <div class="calendar-header">
-        <button @onclick="PreviousMonth">←</button>
-        <span>@currentMonth.ToString("MMMM yyyy")</span>
-        <button @onclick="NextMonth">→</button>
+    <div class="mb-3">
+        <label>Tiempo inicial</label>
+        <div>
+            <InputText type="time" class="form-control" @bind-Value="startTimeString" />
+        </div>
+    </div>
+    <div class="mb-3">
+        <label>Tiempo final</label>
+        <div>
+            <InputText type="time" class="form-control" @bind-Value="finalTimeString" />
+        </div>
     </div>
 
-    <div class="calendar-grid">
-        @foreach (var day in daysOfWeek)
-        {
-            <div class="day-header">@day</div>
-        }
-        @foreach (var day in monthDays)
-        {
-            <div class="day-cell" @onclick="() => SelectDate(day)">
-                @day.Day
-            </div>
-        }
+    <div class="mb-3">
+        <label>Fecha</label>
+        <div>
+            <InputDate class="form-control" @bind-Value="Reservacion.Fecha" />
+            <ValidationMessage For="@(() => Reservacion.Fecha)" />
+        </div>
     </div>
-    
-    <div class="reservation-details">
-        <h4>Hora y duración</h4>
-        <input type="time" @bind="StartTime" /> 
-        <input type="time" @bind="FinalTime" />
 
-        <h4>Dirección</h4>
-        <input type="text" @bind="Place" placeholder="Ingrese lugar..." />
-
-        <button class="reserve-button" @onclick="Reserve">Reservar</button>
+    <div class="mb-3">
+        <label>Lugar</label>
+        <div>
+            <InputText class="form-control" @bind-Value="Reservacion.Place" />
+            <ValidationMessage For="@(() => Reservacion.Place)" />
+        </div>
     </div>
-</div>
+    <div class="mb-3">
+        <label>Id Contratante</label>
+        <div>
+            <InputNumber class="form-control" @bind-Value="Reservacion.ContratanteId" />
+            <ValidationMessage For="@(() => Reservacion.ContratanteId)" />
+        </div>
+    </div>
+    <div class="mb-3">
+        <label>Id Agrupacion o solista</label>
+        <div>
+            <InputNumber class="form-control" @bind-Value="Reservacion.AgrupacionId" />
+            <ValidationMessage For="@(() => Reservacion.AgrupacionId)" />
+        </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Guardar</button>
+    <button class="btn btn-info" type="reset">Limpiar</button>
+    <button class="btn btn-success" @onclick="ReturnAction">Regresar</button>
+
+</EditForm>
 
 @code {
-    private DateTime currentMonth = DateTime.Now;
-    private DateTime selectedDate;
-    private List<DateTime> monthDays = new List<DateTime>();
-    private readonly string[] daysOfWeek = { "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo" };
+    private EditContext editContext;
+    private string startTimeString;
+    private string finalTimeString;
 
-    [Required(ErrorMessage = "La hora de inicio es obligatoria")]
-    public TimeOnly StartTime { get; set; }
 
-    [Required(ErrorMessage = "La hora de finalización es obligatoria")]
-    public TimeOnly FinalTime { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public Reservacion Reservacion { get; set; }
 
-    [Required(ErrorMessage = "La fecha es obligatoria")]
-    public DateOnly Fecha { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
 
-    [Required(ErrorMessage = "El lugar es obligatorio")]
-    public string Place { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public EventCallback ReturnAction { get; set; }
 
-    protected override void OnInitialized()
+    public bool FormPostedSuccessfully { get; set; } = false;
+
+    private async Task HandleValidSubmit()
     {
-        GenerateCalendarDays();
-    }
-
-    private void GenerateCalendarDays()
-    {
-        monthDays.Clear();
-        var daysInMonth = DateTime.DaysInMonth(currentMonth.Year, currentMonth.Month);
-        for (int day = 1; day <= daysInMonth; day++)
+        if (TimeSpan.TryParse(startTimeString, out var startTime) &&
+            TimeSpan.TryParse(finalTimeString, out var finalTime))
         {
-            monthDays.Add(new DateTime(currentMonth.Year, currentMonth.Month, day));
+            Reservacion.StartTime = startTime;
+            Reservacion.FinalTime = finalTime;
+            await OnSubmit.InvokeAsync(null);
+        }
+        else
+        {
+            await swal.FireAsync("Error", "Los tiempos proporcionados no son válidos.", SweetAlertIcon.Error);
         }
     }
 
-    private void SelectDate(DateTime date)
+    private async Task OnBeforeInternalNavigation(LocationChangingContext context)
     {
-        selectedDate = date;
-        Fecha = DateOnly.FromDateTime(date);
-        StateHasChanged();
-    }
+        var formularioFueEditado = editContext.IsModified();
 
-    private void PreviousMonth()
-    {
-        currentMonth = currentMonth.AddMonths(-1);
-        GenerateCalendarDays();
-    }
+        if (!formularioFueEditado)
+        {
+            return;
+        }
 
-    private void NextMonth()
-    {
-        currentMonth = currentMonth.AddMonths(1);
-        GenerateCalendarDays();
-    }
+        if (FormPostedSuccessfully)
+        {
+            return;
+        }
 
-    private void Reserve()
-    {
-        // Aquí puedes agregar la lógica para almacenar la reservación
-        Console.WriteLine($"Reservado para {Fecha} de {StartTime} a {FinalTime} en {Place}");
+        var resultado = await swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Deseas abandonar la página y perder los cambios?",
+                Icon = SweetAlertIcon.Warning,
+                ShowCancelButton = true
+            });
+
+        var confirmado = !string.IsNullOrEmpty(resultado.Value);
+
+        if (confirmado)
+        {
+            return;
+        }
+
+        context.PreventNavigation();
     }
 }
