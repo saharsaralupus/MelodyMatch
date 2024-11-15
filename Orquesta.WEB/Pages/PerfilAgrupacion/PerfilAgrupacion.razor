@@ -134,8 +134,7 @@
             <div class="profile-text">
                 <h2>@agrupacion.Name</h2>
                 <h1 class="genre">@GetGeneroMusicalName(agrupacion.Id)</h1>
-                @* <button class="reserve-button" >Reservar</button> *@
-                <a href="procesoReservacion" class="reserve-button">Reservar</a>
+                <a href="/reservacion/create" class="reserve-button">Reservar</a>
             </div>
         </div>
 
@@ -143,7 +142,6 @@
             <h3>Descripción</h3>
             <p>@agrupacion.Description</p>
             <p><strong>Precio / hora:</strong> @agrupacion.Price_Hour</p>
-          @*   <button class="repertoire-button" href="/integrante">Conoce nuestro repertorio</button> *@
             <a href="repertorio" class="repertoire-button">Conoce nuestro repertorio</a>
         </div>
 
