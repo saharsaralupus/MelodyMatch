@@ -2,6 +2,9 @@
 @using Orquesta.Shared.Entities
 @using System.ComponentModel.DataAnnotations
 @inject SweetAlertService swal
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
 
 
 <h3>ProcesoReservacion</h3>
@@ -31,7 +34,6 @@
             <ValidationMessage For="@(() => Reservacion.Fecha)" />
         </div>
     </div>
-
     <div class="mb-3">
         <label>Lugar</label>
         <div>
@@ -40,19 +42,13 @@
         </div>
     </div>
     <div class="mb-3">
-        <label>Id Contratante</label>
+        <label>Para confirmar la reserva coloque su Documento y presione guardar!</label>
         <div>
-            <InputNumber class="form-control" @bind-Value="Reservacion.ContratanteId" />
-            <ValidationMessage For="@(() => Reservacion.ContratanteId)" />
+            <InputText class="form-control" @bind-Value="Documento" />
+            <ValidationMessage For="@(() => Documento)" />
         </div>
     </div>
-    <div class="mb-3">
-        <label>Id Agrupacion o solista</label>
-        <div>
-            <InputNumber class="form-control" @bind-Value="Reservacion.AgrupacionId" />
-            <ValidationMessage For="@(() => Reservacion.AgrupacionId)" />
-        </div>
-    </div>
+
 
     <button class="btn btn-primary" type="submit">Guardar</button>
     <button class="btn btn-info" type="reset">Limpiar</button>
@@ -64,7 +60,8 @@
     private EditContext editContext;
     private string startTimeString;
     private string finalTimeString;
-
+    private string Documento;
+    public List<Contratante> Contratantes { get; set; } = new List<Contratante>();
 
     [EditorRequired]
     [Parameter]
@@ -80,6 +77,32 @@
 
     public bool FormPostedSuccessfully { get; set; } = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        editContext = new EditContext(Reservacion);
+
+        var responseRepresentante = await repository.GetAsync<List<Contratante>>("api/contratante");
+        if (!responseRepresentante.Error)
+        {
+            Contratantes = responseRepresentante.Response;
+        }
+    }
+
+    private int GetContratanteId ()
+    {
+        var contratante = Contratantes.FirstOrDefault(c =>
+            string.Equals(c.Document, Documento?.Trim(), StringComparison.OrdinalIgnoreCase));
+
+        if (contratante != null)
+        {
+            Reservacion.ContratanteId = contratante.Id;
+            return contratante.Id;
+        }
+
+        Reservacion.ContratanteId = 0; // Asegúrate de resetearlo si no se encuentra
+        return 0;
+    }
+
     private async Task HandleValidSubmit()
     {
         if (TimeSpan.TryParse(startTimeString, out var startTime) &&
@@ -87,6 +110,12 @@
         {
             Reservacion.StartTime = startTime;
             Reservacion.FinalTime = finalTime;
+            var contratanteId = GetContratanteId();
+            if (contratanteId == 0)
+            {
+                await swal.FireAsync("Error", "No se encontró un contratante con el documento ingresado.", SweetAlertIcon.Error);
+                return;
+            }
             await OnSubmit.InvokeAsync(null);
         }
         else
