@@ -1,4 +1,4 @@
-﻿@page "/perfilAgrupacion/{Id:int}"
+﻿@page "/perfilContratante/{Id:int}"
 @using Orquesta.Shared.Entities
 @using Orquesta.WEB.Repositories
 @using Orquesta.WEB.Shared
@@ -122,34 +122,21 @@
 
 </style>
 
-<div class="header-image">
-    <img src="https://musicanddynamics.com/wp-content/uploads/2021/04/clases-de-lenguaje-musical.jpeg" alt="Orquesta">
-</div>
-
-@if (agrupacion != null)
+@if (contratante != null)
 {
     <div class="profile-content">
         <div class="profile-info">
             <img class="profile-pic" src="https://live.staticflickr.com/3542/3661289018_8aae162a56_c.jpg" alt="Foto del artista">
             <div class="profile-text">
-                <h2>@agrupacion.Name</h2>
-                <h1 class="genre">@GetGeneroMusicalName(agrupacion.Id)</h1>
-                <a href="procesoReservacion" class="reserve-button">Reservar</a>
+                <h2>@contratante.Name</h2>
             </div>
-        </div>
-
-        <div class="description">
-            <h3>Descripción</h3>
-            <p>@agrupacion.Description</p>
-            <p><strong>Precio / hora:</strong> @agrupacion.Price_Hour</p>
-            <a href="repertorio" class="repertoire-button">Conoce nuestro repertorio</a>
         </div>
 
         <div class="ratings">
             <h3>Calificaciones</h3>
             <div class="ratings-summary">
                 @{
-                    var puntajes = ContadorPuntaje(agrupacion.Id);
+                    var puntajes = ContadorPuntaje(contratante.Id);
                 }
                 <div class="stars-summary">
                     <span>⭐⭐⭐⭐⭐</span> @puntajes[0]<br>
@@ -161,9 +148,9 @@
             </div>
 
             <div class="ratings-list">
-                @foreach (var item in Calificacion_Agrupaciones!)
+                @foreach (var item in Calificacion_Contratante!)
                 {
-                    if (item.AgrupacionId == agrupacion.Id)
+                    if (item.ContratanteId == contratante.Id)
                     {
                         <div class="rating">
                             <div class="stars">
@@ -191,11 +178,9 @@ else
     [Parameter]
     public int Id { get; set; }
 
-    public Agrupacion agrupacion;
-    private List<Agrupacion_Genero> AgrupacionGeneros { get; set; }
-    private List<GeneroMusical> GeneroMusicals { get; set; }
-    public List<Calificacion_Agrupacion> Calificacion_Agrupaciones { get; set; }
-    public List<Agrupacion> Agrupaciones { get; set; }
+    public Contratante contratante;
+    public List<Calificacion_Contratante> Calificacion_Contratante { get; set; }
+    public List<Contratante> Contratantes { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -203,37 +188,23 @@ else
     }
 
     private async Task LoadAsync()
-    {
-        var responseHttp = await repository.GetAsync<List<Agrupacion_Genero>>("/api/agrupacionGenero");
-        if (responseHttp.Error)
-        {
-            var message = await responseHttp.GetErrorMessageAsync();
-            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
-            return;
-        }
-        AgrupacionGeneros = responseHttp.Response;
+    {     
 
-        var responseRepresentante = await repository.GetAsync<List<GeneroMusical>>("/api/generoMusical");
-        if (!responseRepresentante.Error)
+        var responseCalificacionContratante = await repository.GetAsync<List<Calificacion_Contratante>>("/api/califiacion_contratante");
+        if (!responseCalificacionContratante.Error)
         {
-            GeneroMusicals = responseRepresentante.Response;
-        }
-
-        var responseCalificacionAgrupacion = await repository.GetAsync<List<Calificacion_Agrupacion>>("/api/calificacion_agrupacion");
-        if (!responseCalificacionAgrupacion.Error)
-        {
-            Calificacion_Agrupaciones = responseCalificacionAgrupacion.Response;
+            Calificacion_Contratante = responseCalificacionContratante.Response;
         }
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        var responseHttp = await repository.GetAsync<Agrupacion>($"/api/agrupacion/{Id}");
+        var responseHttp = await repository.GetAsync<Contratante>($"/api/contratante/{Id}");
         if (responseHttp.Error)
         {
             if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
             {
-                navigationManager.NavigateTo("/agrupacion");
+                navigationManager.NavigateTo("/contratante");
             }
             else
             {
@@ -243,28 +214,12 @@ else
         }
         else
         {
-            agrupacion = responseHttp.Response;
+            contratante = responseHttp.Response;
         }
     }
 
-    private string GetGeneroMusicalName(int AgrupacionId)
-    {
-        if (AgrupacionGeneros == null || GeneroMusicals == null)
-        {
-            return "Datos no disponibles";
-        }
 
-        var agrupaciongenero = AgrupacionGeneros.FirstOrDefault(i => i.AgrupacionId == AgrupacionId);
-        if (agrupaciongenero == null)
-        {
-            return "Género no encontrado";
-        }
-
-        var generoMusical = GeneroMusicals.FirstOrDefault(i => i.Id == agrupaciongenero.GeneroMusicalId);
-        return generoMusical != null ? generoMusical.Name : "Género no encontrado";
-    }
-
-    private List<int> ContadorPuntaje(int AgrupacionId)
+    private List<int> ContadorPuntaje(int ContratanteId)
     {
         int count5 = 0;
         int count4 = 0;
@@ -272,7 +227,7 @@ else
         int count2 = 0;
         int count1 = 0;
 
-        var calificaciones = Calificacion_Agrupaciones.Where(i => i.AgrupacionId == AgrupacionId);
+        var calificaciones = Calificacion_Contratante.Where(i => i.ContratanteId == ContratanteId);
 
         foreach (var item in calificaciones)
         {
