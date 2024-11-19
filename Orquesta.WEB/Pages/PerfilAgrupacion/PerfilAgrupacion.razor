@@ -264,7 +264,7 @@ else
         return generoMusical != null ? generoMusical.Name : "Género no encontrado";
     }
 
-    private List<int> ContadorPuntaje(int AgrupacionId)
+    private List<int> ContadorPuntaje(int agrupacionId)
     {
         int count5 = 0;
         int count4 = 0;
@@ -272,7 +272,7 @@ else
         int count2 = 0;
         int count1 = 0;
 
-        var calificaciones = Calificacion_Agrupaciones.Where(i => i.AgrupacionId == AgrupacionId);
+        var calificaciones = Calificacion_Agrupaciones.Where(i => i.AgrupacionId == agrupacionId);
 
         foreach (var item in calificaciones)
         {

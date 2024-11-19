@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Orquesta.API.Controllers
 {
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("/api/calificacion_agrupacion")]
     public class Calificacion_Agrupacion_Controller : ControllerBase
     {
@@ -29,7 +29,6 @@ namespace Orquesta.API.Controllers
         }
 
         [HttpPost] //Insertar datos nuevos 
-
         public async Task<ActionResult> Post(Calificacion_Agrupacion calificacionAgrupacion)
         {
 

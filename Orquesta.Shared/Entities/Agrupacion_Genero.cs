@@ -17,5 +17,6 @@ namespace Orquesta.Shared.Entities
 		[JsonIgnore]
 		public GeneroMusical GeneroMusical { get; set; }
 		public int GeneroMusicalId{ get; set; }
+
     }
 }

@@ -38,7 +38,5 @@ namespace Orquesta.Shared.Entities
         [JsonIgnore]
         public ICollection<Calificacion_Contratante> Calificaciones_Contratante { get; } = new List<Calificacion_Contratante>();
 
-        [JsonIgnore]
-        public ICollection<Calificacion_Agrupacion> Calificaciones_Agrupacion { get; } = new List<Calificacion_Agrupacion>();
     }
 }
