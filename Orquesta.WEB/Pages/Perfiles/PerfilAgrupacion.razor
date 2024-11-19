@@ -130,7 +130,7 @@
 {
     <div class="profile-content">
         <div class="profile-info">
-            <img class="profile-pic" src="https://live.staticflickr.com/3542/3661289018_8aae162a56_c.jpg" alt="Foto del artista">
+            <img class="profile-pic" src="https://localhost:7000/@GetUserPhoto(agrupacion.RepresentanteId)" alt="Foto del artista">
             <div class="profile-text">
                 <h2>@agrupacion.Name</h2>
                 <h1 class="genre">@GetGeneroMusicalName(agrupacion.Id)</h1>
@@ -196,6 +196,8 @@ else
     private List<GeneroMusical> GeneroMusicals { get; set; }
     public List<Calificacion_Agrupacion> Calificacion_Agrupaciones { get; set; }
     public List<Agrupacion> Agrupaciones { get; set; }
+    public List<Representante> Representantes { get; set; }
+    public List<User> Users { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -213,10 +215,22 @@ else
         }
         AgrupacionGeneros = responseHttp.Response;
 
-        var responseRepresentante = await repository.GetAsync<List<GeneroMusical>>("/api/generoMusical");
+        var responseGenero = await repository.GetAsync<List<GeneroMusical>>("/api/generoMusical");
+        if (!responseGenero.Error)
+        {
+            GeneroMusicals = responseGenero.Response;
+        }
+        
+        var responseRepresentante = await repository.GetAsync<List<Representante>>("/api/representante");
         if (!responseRepresentante.Error)
         {
-            GeneroMusicals = responseRepresentante.Response;
+            Representantes = responseRepresentante.Response;
+        }
+
+        var responseUser = await repository.GetAsync<List<User>>("/api/accounts/nombre");
+        if (!responseUser.Error)
+        {
+            Users = responseUser.Response;
         }
 
         var responseCalificacionAgrupacion = await repository.GetAsync<List<Calificacion_Agrupacion>>("/api/calificacion_agrupacion");
@@ -263,6 +277,14 @@ else
         var generoMusical = GeneroMusicals.FirstOrDefault(i => i.Id == agrupaciongenero.GeneroMusicalId);
         return generoMusical != null ? generoMusical.Name : "Género no encontrado";
     }
+
+    private string GetUserPhoto(int representanteId)
+    {
+        var representante = Representantes.FirstOrDefault(i => i.Id == representanteId);
+        var user = Users.FirstOrDefault(i => i.Document == representante.Document);
+        return user != null ? user.Photo : "Foto no encontrada";
+    }
+
 
     private List<int> ContadorPuntaje(int agrupacionId)
     {

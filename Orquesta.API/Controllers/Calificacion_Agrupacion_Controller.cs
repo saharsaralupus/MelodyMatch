@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Orquesta.API.Controllers
 {
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("/api/calificacion_agrupacion")]
     public class Calificacion_Agrupacion_Controller : ControllerBase
     {
