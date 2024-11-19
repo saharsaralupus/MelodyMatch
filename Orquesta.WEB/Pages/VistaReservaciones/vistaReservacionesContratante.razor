@@ -1,0 +1,139 @@
+﻿@page "/vistaReservacionRepresentante/{Id:int}"
+@using Orquesta.Shared.Entities
+@using Orquesta.WEB.Repositories
+@using Orquesta.WEB.Shared
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+
+
+
+<style>
+    .profile-content {
+        padding: 20px;
+        width: 100%;
+        background-color: #f5f5f5; /* Fondo para destacar cada perfil */
+        margin-bottom: 10px; /* Separación entre perfiles */
+        border-radius: 8px; /* Borde redondeado */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    }
+</style>
+
+<GenericList MyList="Reservaciones">
+    <Body>
+        <h2>RESERVACIONES</h2>
+        <div class="reservaciones-list">
+            @foreach (var item in Reservaciones!)
+            {
+                <div class="profile-content">
+                    <div class="profile-info">
+                        @* <img class="profile-pic2" src="https://localhost:7000/@GetUserPhoto(item.RepresentanteId)" alt="Foto del artista"> *@
+                        <div class="profile-text">
+                            <h2 class="genre">@GetAgrupacionName(item.AgrupacionId)</h2>
+                            <h3>WHATSAPP:@GetRepresentantePhone(item.AgrupacionId) </h3>
+                            <p><strong>Hora:</strong> @item.StartTime</p>
+                            <p><strong>Fecha:</strong> @item.Fecha.ToString("dd/MM/yyyy")</p>
+                            <p>
+                                <strong>Duración:</strong>
+                                @if (item.FinalTime > item.StartTime)
+                                {
+                                    var duracion = item.FinalTime - item.StartTime;
+                                    <span>@($"{duracion.Hours} horas y {duracion.Minutes} minutos")</span>
+                                }
+                                else
+                                {
+                                    <span>La hora final debe ser mayor que la hora de inicio.</span>
+                                }
+                            </p>
+                            <p><strong>Lugar:</strong> @item.Place</p>
+                            @* Convertir la fecha actual a DateOnly para la comparación *@
+                            @{
+                                var fechaActual = DateOnly.FromDateTime(DateTime.Now);
+                                bool esFechaPasada = item.Fecha < fechaActual;
+                            }
+
+                            <a href="@($"cancel/{item.Id}")"
+                               class="btn btn-sm btn-warning @(esFechaPasada ? "disabled" : "")"
+                               @(esFechaPasada ? "tabindex='-1' aria-disabled='true'" : "" )>
+                                <a href="" class="bi bi-pencil-square">Cancelar</a>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+    </Body>
+</GenericList>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public Reservacion reservacion;
+    public List<Reservacion> Reservaciones { get; set; }
+    public List<Agrupacion> Agrupaciones { get; set; }
+    public List<Representante> Representantes { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.GetAsync<List<Reservacion>>("/api/reservacion");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+        Reservaciones = responseHttp.Response;
+
+        var responseAgrupacion = await repository.GetAsync<List<Agrupacion>>("api/agrupacion");
+        if (!responseAgrupacion.Error)
+        {
+            Agrupaciones = responseAgrupacion.Response;
+        }
+
+        var responseGeneroMusical = await repository.GetAsync<List<Representante>>("/api/representante");
+        if (!responseGeneroMusical.Error)
+        {
+            Representantes = responseGeneroMusical.Response;
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var responseHttp = await repository.GetAsync<Reservacion>($"/api/reservacion/{Id}");
+        if (responseHttp.Error)
+        {
+           
+        }
+        else
+        {
+            reservacion = responseHttp.Response;
+        }
+    }
+
+    private void NavigateToBusqueda()
+    {
+        navigationManager.NavigateTo("/listabusqueda");
+    }
+
+    private string GetAgrupacionName(int AgrupacionId)
+    {
+        var agrupacion = Agrupaciones.FirstOrDefault(i => i.Id == AgrupacionId);
+        return agrupacion != null ? agrupacion.Name : "Agrupacion no encontrado";
+    }
+
+    private string GetRepresentantePhone(int AgrupacionId)
+    {
+        var agrupacion = Agrupaciones.FirstOrDefault(i => i.Id == AgrupacionId);
+        var representante = Representantes.FirstOrDefault(i => i.Id == agrupacion.RepresentanteId);
+        return representante != null ? representante.PhoneNumber : "Representante no encontrado";
+    }
+
+}
+
