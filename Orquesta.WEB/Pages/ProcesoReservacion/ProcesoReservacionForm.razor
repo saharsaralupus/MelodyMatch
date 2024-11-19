@@ -7,7 +7,7 @@
 @inject NavigationManager navigationManager
 
 
-<h3>ProcesoReservacion</h3>
+<h3> reserva</h3>
 
 <NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation"></NavigationLock>
 
@@ -41,13 +41,6 @@
             <ValidationMessage For="@(() => Reservacion.Place)" />
         </div>
     </div>
-    <div class="mb-3">
-        <label>Para confirmar la reserva coloque su Documento y presione guardar!</label>
-        <div>
-            <InputText class="form-control" @bind-Value="Documento" />
-            <ValidationMessage For="@(() => Documento)" />
-        </div>
-    </div>
 
 
     <button class="btn btn-primary" type="submit">Guardar</button>
@@ -62,6 +55,9 @@
     private string finalTimeString;
     private string Documento;
     public List<Contratante> Contratantes { get; set; } = new List<Contratante>();
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; } = null!;
 
     [EditorRequired]
     [Parameter]
@@ -79,8 +75,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+        var authenticationState = await authenticationStateTask;
+        var user = authenticationState.User;
+        Documento = user.FindFirst(c => c.Type == "Document")?.Value;
         editContext = new EditContext(Reservacion);
-
         var responseRepresentante = await repository.GetAsync<List<Contratante>>("api/contratante");
         if (!responseRepresentante.Error)
         {
@@ -88,10 +86,9 @@
         }
     }
 
-    private int GetContratanteId ()
+    private int GetContratanteId(string documento)
     {
-        var contratante = Contratantes.FirstOrDefault(c =>
-            string.Equals(c.Document, Documento?.Trim(), StringComparison.OrdinalIgnoreCase));
+        var contratante = Contratantes.FirstOrDefault(c => c.Document == documento);
 
         if (contratante != null)
         {
@@ -110,7 +107,7 @@
         {
             Reservacion.StartTime = startTime;
             Reservacion.FinalTime = finalTime;
-            var contratanteId = GetContratanteId();
+            var contratanteId = GetContratanteId(Documento);
             if (contratanteId == 0)
             {
                 await swal.FireAsync("Error", "No se encontró un contratante con el documento ingresado.", SweetAlertIcon.Error);
