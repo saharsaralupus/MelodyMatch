@@ -22,6 +22,14 @@
 		</div>
 	</div>
 
+	<div class="mb-3">
+		<label> Versión </label>
+		<div>
+			<InputNumber class="form-control" @bind-Value="Repertorio.AgrupacionId" />
+			<ValidationMessage For="@(()=>Repertorio.AgrupacionId)" />
+		</div>
+	</div>
+
 	<button class="btn btn-primary" type="submit">Guardar</button>
 	<button class="btn btn-info" type="reset">Limpiar</button>
 	<button class="btn btn-success" @onclick="ReturnAction">Regresar</button>
