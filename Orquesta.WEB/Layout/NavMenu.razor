@@ -41,6 +41,21 @@
             </Authorized>
         </AuthorizeView>
 
+        <AuthorizeView Roles="UserRepresentante">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="reservacion" style="line-height: 1.5;">
+                        <i class="bi bi-hand-index-fill" aria-hidden="true" style="line-height: inherit;"></i> Reservación
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="@PerfilUrl" style="line-height: 1.5;">
+                        <i class="bi bi-hand-index-fill" aria-hidden="true" style="line-height: inherit;"></i> Perfil
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
         <AuthorizeView Roles="Admin">
             <Authorized>
 
@@ -93,7 +108,9 @@
 
 @code {
     public Representante representante;
+    public Agrupacion agrupacion;
     public List<Representante> Representantes { get; set; }
+    public List<Agrupacion> Agrupaciones { get; set; }
     public Contratante contratante;
     public List<Contratante> Contratantes { get; set; }
     public List<User> Users { get; set; }
@@ -123,6 +140,7 @@
         var user = authenticationState.User;
         Documento = user.FindFirst(c => c.Type == "Document")?.Value;
         bool IsUserContratante = authenticationState.User.IsInRole("UserContratante");
+        bool IsUserRepresentante = authenticationState.User.IsInRole("UserRepresentante");
 
         var responseUsers = await repository.GetAsync<List<User>>("/api/accounts/nombre");
         if (!responseUsers.Error)
@@ -140,15 +158,21 @@
             contratante = Contratantes.FirstOrDefault(c => c.Document == Documento);
             PerfilUrl = $"perfilContratante/{contratante.Id}";
         }
-        else
+        else if (IsUserRepresentante)
         {
             var responseRepresentante = await repository.GetAsync<List<Representante>>("api/representante");
             if (!responseRepresentante.Error)
             {
                 Representantes = responseRepresentante.Response;
             }
+            var responseAgrupaciones = await repository.GetAsync<List<Agrupacion>>("api/agrupacion");
+            if (!responseAgrupaciones.Error)
+            {
+                Agrupaciones = responseAgrupaciones.Response;
+            }
             representante = Representantes.FirstOrDefault(c => c.Document == Documento);
-            PerfilUrl = $"perfilRepresentante/{representante.Id}";
+            agrupacion = Agrupaciones.FirstOrDefault(i => i.RepresentanteId == representante.Id);
+            PerfilUrl = $"perfilAgrupacion/{agrupacion.Id}";
         }
     }
 }
