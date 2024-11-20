@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Orquesta.API.Migrations
 {
     /// <inheritdoc />
-    public partial class primero : Migration
+    public partial class Inicial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -207,27 +207,6 @@ namespace Orquesta.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Calificaciones_Contratante",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Puntaje = table.Column<int>(type: "int", nullable: false),
-                    Comentario = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    ContratanteId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Calificaciones_Contratante", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Calificaciones_Contratante_Contratantes_ContratanteId",
-                        column: x => x.ContratanteId,
-                        principalTable: "Contratantes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Agrupaciones",
                 columns: table => new
                 {
@@ -243,6 +222,34 @@ namespace Orquesta.API.Migrations
                     table.PrimaryKey("PK_Agrupaciones", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Agrupaciones_Representantes_RepresentanteId",
+                        column: x => x.RepresentanteId,
+                        principalTable: "Representantes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Calificaciones_Contratante",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Puntaje = table.Column<int>(type: "int", nullable: false),
+                    Comentario = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    ContratanteId = table.Column<int>(type: "int", nullable: false),
+                    RepresentanteId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Calificaciones_Contratante", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Calificaciones_Contratante_Contratantes_ContratanteId",
+                        column: x => x.ContratanteId,
+                        principalTable: "Contratantes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Calificaciones_Contratante_Representantes_RepresentanteId",
                         column: x => x.RepresentanteId,
                         principalTable: "Representantes",
                         principalColumn: "Id",
@@ -284,8 +291,7 @@ namespace Orquesta.API.Migrations
                     Puntaje = table.Column<int>(type: "int", nullable: false),
                     Comentario = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     AgrupacionId = table.Column<int>(type: "int", nullable: false),
-                    ContratanteId = table.Column<int>(type: "int", nullable: true),
-                    ContratateId = table.Column<int>(type: "int", nullable: false)
+                    ContratanteId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -300,7 +306,8 @@ namespace Orquesta.API.Migrations
                         name: "FK_Calificaciones_Agrupacion_Contratantes_ContratanteId",
                         column: x => x.ContratanteId,
                         principalTable: "Contratantes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -442,6 +449,11 @@ namespace Orquesta.API.Migrations
                 name: "IX_Calificaciones_Contratante_ContratanteId",
                 table: "Calificaciones_Contratante",
                 column: "ContratanteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Calificaciones_Contratante_RepresentanteId",
+                table: "Calificaciones_Contratante",
+                column: "RepresentanteId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Integrantes_AgrupacionId",

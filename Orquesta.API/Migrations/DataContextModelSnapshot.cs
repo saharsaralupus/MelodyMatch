@@ -223,10 +223,7 @@ namespace Orquesta.API.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int?>("ContratanteId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ContratateId")
+                    b.Property<int>("ContratanteId")
                         .HasColumnType("int");
 
                     b.Property<int>("Puntaje")
@@ -259,9 +256,14 @@ namespace Orquesta.API.Migrations
                     b.Property<int>("Puntaje")
                         .HasColumnType("int");
 
+                    b.Property<int>("RepresentanteId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ContratanteId");
+
+                    b.HasIndex("RepresentanteId");
 
                     b.ToTable("Calificaciones_Contratante");
                 });
@@ -613,7 +615,9 @@ namespace Orquesta.API.Migrations
 
                     b.HasOne("Orquesta.Shared.Entities.Contratante", "Contratante")
                         .WithMany("Calificaciones_Agrupacion")
-                        .HasForeignKey("ContratanteId");
+                        .HasForeignKey("ContratanteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Agrupacion");
 
@@ -628,7 +632,15 @@ namespace Orquesta.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Orquesta.Shared.Entities.Representante", "Representante")
+                        .WithMany("Calificaciones_Contratante")
+                        .HasForeignKey("RepresentanteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Contratante");
+
+                    b.Navigation("Representante");
                 });
 
             modelBuilder.Entity("Orquesta.Shared.Entities.Integrante", b =>
@@ -693,6 +705,8 @@ namespace Orquesta.API.Migrations
             modelBuilder.Entity("Orquesta.Shared.Entities.Representante", b =>
                 {
                     b.Navigation("AgrupacionSolistas");
+
+                    b.Navigation("Calificaciones_Contratante");
                 });
 #pragma warning restore 612, 618
         }

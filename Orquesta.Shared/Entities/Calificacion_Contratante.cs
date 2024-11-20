@@ -24,6 +24,10 @@ namespace Orquesta.Shared.Entities
         [JsonIgnore]
         public Contratante Contratante { get; set; }
         public int ContratanteId { get; set; }
+        
+        [JsonIgnore]
+        public Representante Representante { get; set; }
+        public int RepresentanteId { get; set; }
 
     }
 }
