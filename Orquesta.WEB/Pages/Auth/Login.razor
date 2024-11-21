@@ -147,7 +147,7 @@
             {
                 await BlazoredModal.CloseAsync(ModalResult.Ok());
             }
-            navigationManager.NavigateTo("/"); // Redirigir a la página de inicio
+            navigationManager.NavigateTo("/", forceLoad: true);
         }
     }
 
