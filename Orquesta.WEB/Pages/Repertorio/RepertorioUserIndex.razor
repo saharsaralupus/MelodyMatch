@@ -1,0 +1,143 @@
+﻿@page "/repertorioAgrupacion/{Id:int}"
+@using Orquesta.Shared.Entities
+@using Orquesta.WEB.Repositories
+@using Orquesta.WEB.Shared
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+
+<div class="card">
+    <div class="card-header">
+        <span>
+            <i class="bi bi-person" /> Repertorio de @(agrupacion != null ? agrupacion.Name : "Cargando...")
+            <AuthorizeView Roles="Admin, UserRepresentante">
+                <Authorized>
+                    <a class="btn btn-primary btn-sm float-end" href="/repertorioAgrupacion/create/@Id"><i class="bi bi-plus-circle" /> Nueva canción</a>
+                </Authorized>
+            </AuthorizeView>
+
+        </span>
+    </div>
+
+    <div class="card-body">
+
+        <GenericList MyList="Repertorios">
+
+            <Body>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <td><b>Canción</b></td>
+                            <td><b>Versión</b></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Repertorios != null)
+                        {
+                            @foreach (var item in Repertorios!)
+                            {
+                                @if (item.AgrupacionId == Id)
+                                {
+                                    <tr>
+                                        <td> @item.Name</td>
+                                        <td> @item.Version </td>
+                                        <td>
+                                            <AuthorizeView Roles="Admin, UserRepresentante">
+                                                <Authorized>
+                                                    <button @onclick=@(() => DeleteAsycn(item)) class="btn btn-sm btn-danger"><i class="bi bi-trash-fill" /> Borrar</button>
+                                                </Authorized>
+                                            </AuthorizeView>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <span>La agrupación no tiene repertorio.</span>
+                        }
+                    </tbody>
+                </table>
+            </Body>
+        </GenericList>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public List<Repertorio> Repertorios { get; set; }
+    public List<Agrupacion> Agrupaciones { get; set; }
+    public Agrupacion agrupacion { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.GetAsync<List<Repertorio>>("/api/repertorio");
+        if (!responseHttp.Error)
+        {
+            Repertorios = responseHttp.Response;
+        }
+        var responseAgrupacionSolista = await repository.GetAsync<List<Agrupacion>>("/api/agrupacion");
+        if (!responseAgrupacionSolista.Error)
+        {
+            Agrupaciones = responseAgrupacionSolista.Response;
+        }
+
+        agrupacion = Agrupaciones.FirstOrDefault(i => i.RepresentanteId == Id);
+    }
+
+
+    private string GetAgrupacionSolistaName(int AgrupacionSolistaId)
+    {
+        var agrupacionSolista = Agrupaciones.FirstOrDefault(i => i.Id == AgrupacionSolistaId);
+        return agrupacionSolista != null ? agrupacionSolista.Name : "Agrupacion no encontrada";
+    }
+
+
+    private async Task DeleteAsycn(Repertorio repertorio)
+    {
+        var result = await sweetAlertService.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = $"¿Estas seguro de querer borrar la relación entre la obra {repertorio.Name} y la banda {repertorio.AgrupacionId}?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true,
+            });
+        var confirm = string.IsNullOrEmpty(result.Value);
+        if (confirm)
+        {
+            return;
+        }
+
+        var responseHttp = await repository.DeleteAsync<Repertorio>($"/api/repertorio/{repertorio.Id}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo($"repertorioAgrupacion/{Id}");
+            }
+            else
+            {
+                var mensajeError = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+            }
+            return;
+        }
+
+        await LoadAsync();
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+                Toast = true,
+                Position = SweetAlertPosition.BottomEnd,
+                ShowConfirmButton = true,
+                Timer = 3000
+            });
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Registro borrado con éxito.");
+    }
+}

@@ -1,0 +1,55 @@
+﻿@page "/repertorioAgrupacion/create/{Id:int}"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+<h3>Repertorio</h3>
+
+<RepertorioUserForm @ref="repertorioUserForm" Repertorio="repertorio" OnSubmit="Create" ReturnAction="Return" />
+
+@code {
+
+    private Repertorio repertorio = new Repertorio();
+    private RepertorioUserForm repertorioUserForm;
+    [Parameter]
+    public int Id { get; set; }
+
+    private async Task Create()
+    {
+        repertorio.AgrupacionId = Id;
+
+        var responseHttp = await repository.PostAsync("/api/repertorio", repertorio);
+        if (responseHttp.Error)
+        {
+
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+
+
+        }
+
+        Return();
+
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+
+                Toast = true,
+                Position = SweetAlertPosition.BottomEnd,
+                ShowConfirmButton = true,
+                Timer = 3000
+
+            });
+
+
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Registro creado con éxito");
+    }
+
+
+    private void Return()
+    {
+        repertorioUserForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo($"/repertorioAgrupacion/{Id}");
+
+    }
+}
