@@ -30,6 +30,7 @@
                     <div class="profile-content">
                         <div class="profile-info">
                             <div class="profile-text">
+                                <img class="profile-pic" src="https://localhost:7000/@GetUserPhoto(item.AgrupacionId)" alt="Foto del contratante">
                                 <h2 class="genre">@GetAgrupacionName(item.Id)</h2>
                                 <h3>WHATSAPP: @GetRepresentantePhone(item.Id) </h3>
                                 <p><strong>Hora:</strong> @item.StartTime</p>
@@ -72,6 +73,7 @@
     public List<Agrupacion> Agrupaciones { get; set; }
     public List<Representante> Representantes { get; set; }
     public List<EstadoReserva> EstadoReservas { get; set; }
+    public List<User> Users { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -102,6 +104,11 @@
         if (!responseAgrupaciones.Error)
         {
             Agrupaciones = responseAgrupaciones.Response;
+        }
+        var responseUser = await repository.GetAsync<List<User>>("/api/accounts/nombre");
+        if (!responseUser.Error)
+        {
+            Users = responseUser.Response;
         }
     }
 
@@ -136,5 +143,13 @@
     {
         var estado = EstadoReservas.FirstOrDefault(i => i.Id == estadoReservaId);
         return estado != null ? estado.Estado : "Estadp no encontrado";
+    }
+
+    private string GetUserPhoto(int agrupacionId)
+    {
+        var agrupacion = Agrupaciones.FirstOrDefault(i => i.Id == agrupacionId);
+        var representante = Representantes.FirstOrDefault(i => i.Id == agrupacion.RepresentanteId);
+        var user = Users.FirstOrDefault(i => i.Document == representante.Document);
+        return user != null ? user.Photo : "Foto no encontrada";
     }
 }

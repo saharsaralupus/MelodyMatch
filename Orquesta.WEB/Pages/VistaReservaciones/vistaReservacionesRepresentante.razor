@@ -30,6 +30,7 @@
                     <div class="profile-content">
                         <div class="profile-info">
                             <div class="profile-text">
+                                <img class="profile-pic" src="https://localhost:7000/@GetUserPhoto(item.ContratanteId)" alt="Foto del contratante">
                                 <h2 class="genre">@GetContratanteName(item.Id)</h2>
                                 <h3>WHATSAPP: @GetContratantePhone(item.Id) </h3>
                                 <p><strong>Hora:</strong> @item.StartTime</p>
@@ -75,6 +76,7 @@
     public List<Representante> Representantes { get; set; }
     public List<Contratante> Contratantes { get; set; }
     public List<EstadoReserva> EstadoReservas { get; set; }
+    public List<User> Users { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -111,6 +113,11 @@
         {
             Contratantes = responseContratantes.Response;
         }
+        var responseUser = await repository.GetAsync<List<User>>("/api/accounts/nombre");
+        if (!responseUser.Error)
+        {
+            Users = responseUser.Response;
+        }
     }
 
     protected override async Task OnParametersSetAsync()
@@ -142,5 +149,12 @@
     {
         var estado = EstadoReservas.FirstOrDefault(i => i.Id == estadoReservaId);
         return estado != null ? estado.Estado : "Estadp no encontrado";
+    }
+
+    private string GetUserPhoto(int contratanteId)
+    {
+        var contratante = Contratantes.FirstOrDefault(i => i.Id == contratanteId);
+        var user = Users.FirstOrDefault(i => i.Document == contratante.Document);
+        return user != null ? user.Photo : "Foto no encontrada";
     }
 }
