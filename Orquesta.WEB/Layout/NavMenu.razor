@@ -29,7 +29,7 @@
         <AuthorizeView Roles="UserContratante">
             <Authorized>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="reservacion" style="line-height: 1.5;">
+                    <NavLink class="nav-link" href="@ReservacionesUrl" style="line-height: 1.5;">
                         <i class="bi bi-hand-index-fill" aria-hidden="true" style="line-height: inherit;"></i> Reservación
                     </NavLink>
                 </div>
@@ -44,7 +44,7 @@
         <AuthorizeView Roles="UserRepresentante">
             <Authorized>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="reservacion" style="line-height: 1.5;">
+                    <NavLink class="nav-link" href="@ReservacionesUrl" style="line-height: 1.5;">
                         <i class="bi bi-hand-index-fill" aria-hidden="true" style="line-height: inherit;"></i> Reservación
                     </NavLink>
                 </div>
@@ -123,6 +123,7 @@
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
     private string PerfilUrl;
+    private string ReservacionesUrl;
 
     private void ToggleNavMenu()
     {
@@ -157,6 +158,7 @@
             }
             contratante = Contratantes.FirstOrDefault(c => c.Document == Documento);
             PerfilUrl = $"perfilContratante/{contratante.Id}";
+            ReservacionesUrl = $"reservacionesContratante/{contratante.Id}";
         }
         else if (IsUserRepresentante)
         {
@@ -172,7 +174,18 @@
             }
             representante = Representantes.FirstOrDefault(c => c.Document == Documento);
             agrupacion = Agrupaciones.FirstOrDefault(i => i.RepresentanteId == representante.Id);
-            PerfilUrl = $"perfilAgrupacion/{agrupacion.Id}";
+            if (agrupacion == null)
+            {
+                await sweetAlertService.FireAsync("Agrupación no encontrada", "Por favor, crea una agrupación.", SweetAlertIcon.Warning);
+
+                navigationManager.NavigateTo($"crearAgrupacion/{representante.Id}");
+            }
+            else
+            {
+                PerfilUrl = $"perfilAgrupacion/{agrupacion.Id}";
+                ReservacionesUrl = $"reservacionesRepresentante/{agrupacion.Id}";
+            }
+
         }
     }
 }

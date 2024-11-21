@@ -1,0 +1,93 @@
+﻿@using CurrieTechnologies.Razor.SweetAlert2
+﻿@using Orquesta.Shared.Entities
+@inject SweetAlertService swal
+
+<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation"></NavigationLock>
+
+<EditForm EditContext="editContext" OnValidSubmit="OnSubmit">
+	<DataAnnotationsValidator />
+
+	<div class="mb-3">
+		<label>Nombre</label>
+		<div>
+			<InputText class="form-control" @bind-Value="Agrupacion.Name" />
+			<ValidationMessage For="@(()=>Agrupacion.Name)" />
+		</div>
+	</div>
+	<div class="mb-3">
+		<label>Descripción</label>
+		<div>
+			<InputText class="form-control" @bind-Value="Agrupacion.Description" />
+			<ValidationMessage For="@(()=>Agrupacion.Description)" />
+		</div>
+	</div>
+	<div class="mb-3">
+		<label>Precio por hora</label>
+		<div>
+			<InputNumber class="form-control" @bind-Value="Agrupacion.Price_Hour" />
+			<ValidationMessage For="@(()=>Agrupacion.Price_Hour)" />
+		</div>
+	</div>
+
+	<button class="btn btn-primary" type="submit">Guardar</button>
+	<button class="btn btn-info" type="reset">Limpiar</button>
+
+</EditForm>
+
+@code {
+
+	private EditContext editContext;
+	protected override void OnInitialized()
+	{
+
+		editContext = new(Agrupacion);
+
+	}
+
+	[EditorRequired]
+	[Parameter]
+	public Agrupacion Agrupacion { get; set; }
+
+	[EditorRequired]
+	[Parameter]
+	public EventCallback OnSubmit { get; set; }
+
+	[EditorRequired]
+	[Parameter]
+	public EventCallback ReturnAction { get; set; }
+
+	public bool FormPostedSuccessfully { get; set; } = false;
+
+	private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+	{
+		var formularioFueEditado = editContext.IsModified();
+
+		if (!formularioFueEditado)
+		{
+			return;
+		}
+
+		if (FormPostedSuccessfully)
+		{
+			return;
+		}
+
+		var resultado = await swal.FireAsync(new SweetAlertOptions
+			{
+				Title = "Confirmación",
+				Text = "¿Deseas abandonar la página y perder los cambios?",
+				Icon = SweetAlertIcon.Warning,
+				ShowCancelButton = true
+			});
+
+		var confirmado = !string.IsNullOrEmpty(resultado.Value);
+
+		if (confirmado)
+		{
+			return;
+		}
+
+		context.PreventNavigation();
+	}
+
+}

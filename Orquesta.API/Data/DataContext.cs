@@ -21,6 +21,7 @@ namespace Orquesta.API.Data
         public DbSet<Repertorio> Repertorios { get; set; }
         public DbSet<Calificacion_Agrupacion> Calificaciones_Agrupacion { get; set; }
         public DbSet<Calificacion_Contratante> Calificaciones_Contratante { get; set; }
+        public DbSet<EstadoReserva> EstadoReservas { get; set; }
 
 
 

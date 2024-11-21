@@ -1,1 +1,146 @@
-﻿
+﻿@page "/reservacionesRepresentante/{Id:int}"
+@using Orquesta.Shared.Entities
+@using Orquesta.WEB.Repositories
+@using Orquesta.WEB.Shared
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+
+
+
+<style>
+    .profile-content {
+    padding: 20px;
+    width: 100%;
+    background-color: #f5f5f5; /* Fondo para destacar cada perfil */
+    margin-bottom: 10px; /* Separación entre perfiles */
+    border-radius: 8px; /* Borde redondeado */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    }
+</style>
+
+<GenericList MyList="Reservaciones">
+    <Body>
+        <h2>RESERVACIONES</h2>
+        <div class="reservaciones-list">
+            @if (ReservacionesEspecifica != null)
+            {
+                @foreach (var item in ReservacionesEspecifica)
+                {
+                    <div class="profile-content">
+                        <div class="profile-info">
+                            <div class="profile-text">
+                                <h2 class="genre">@GetContratanteName(item.Id)</h2>
+                                <h3>WHATSAPP: @GetContratantePhone(item.Id) </h3>
+                                <p><strong>Hora:</strong> @item.StartTime</p>
+                                <p><strong>Fecha:</strong> @item.Fecha.ToString("dd/MM/yyyy")</p>
+                                <p>
+                                    <strong>Duración:</strong>
+                                    @if (item.FinalTime > item.StartTime)
+                                    {
+                                        var duracion = item.FinalTime - item.StartTime;
+                                        <span>@($"{duracion.Hours} horas y {duracion.Minutes} minutos")</span>
+                                    }
+                                    else
+                                    {
+                                        <span>La hora final debe ser mayor que la hora de inicio.</span>
+                                    }
+                                </p>
+                                <p><strong>Lugar:</strong> @item.Place</p>
+                                <p><strong>Estado:</strong> @GetEstadoReservaName(item.EstadoReservaId)</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            } else {
+                <span>No hay reservaciones en este momento</span>
+            }
+
+        </div>
+
+    </Body>
+</GenericList>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public Reservacion reservacion;
+    public Contratante contratante;
+    public Agrupacion agrupacion;
+    public Representante representante;
+    public List<Reservacion> Reservaciones { get; set; }
+    public List<Reservacion> ReservacionesEspecifica { get; set; }
+    public List<Agrupacion> Agrupaciones { get; set; }
+    public List<Representante> Representantes { get; set; }
+    public List<Contratante> Contratantes { get; set; }
+    public List<EstadoReserva> EstadoReservas { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+
+        var responseEstadoReserva = await repository.GetAsync<List<EstadoReserva>>("/api/estadoReserva");
+        if (!responseEstadoReserva.Error)
+        {
+            EstadoReservas = responseEstadoReserva.Response;
+        }
+        var responseHttp = await repository.GetAsync<List<Reservacion>>("/api/reservacion");
+        if (!responseHttp.Error)
+        {
+            Reservaciones = responseHttp.Response;
+        }
+
+        var responseRepresentantes = await repository.GetAsync<List<Representante>>("/api/representante");
+        if (!responseRepresentantes.Error)
+        {
+            Representantes = responseRepresentantes.Response;
+        }
+
+        var responseAgrupaciones = await repository.GetAsync<List<Agrupacion>>("/api/agrupacion");
+        if (!responseAgrupaciones.Error)
+        {
+            Agrupaciones = responseAgrupaciones.Response;
+        }
+        var responseContratantes = await repository.GetAsync<List<Contratante>>("/api/contratante");
+        if (!responseContratantes.Error)
+        {
+            Contratantes = responseContratantes.Response;
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var responseHttp = await repository.GetAsync<Representante>($"/api/representante/{Id}");
+        if (!responseHttp.Error)
+        {
+            representante = responseHttp.Response;
+        }
+        agrupacion = Agrupaciones.FirstOrDefault(i => i.RepresentanteId == representante.Id);
+        ReservacionesEspecifica = Reservaciones.Where(i => i.AgrupacionId == agrupacion.Id).ToList();
+    }
+
+    private string GetContratanteName(int ReservacionId)
+    {
+        var reserva = Reservaciones.FirstOrDefault(i => i.Id == ReservacionId);
+        var contratante = Contratantes.FirstOrDefault(i => i.Id == reserva.ContratanteId);
+        return contratante != null ? contratante.Name : "Representante no encontrado";
+    }
+
+    private string GetContratantePhone(int ReservacionId)
+    {
+        var reserva = Reservaciones.FirstOrDefault(i => i.Id == ReservacionId);
+        var contratante = Contratantes.FirstOrDefault(i => i.Id == reserva.ContratanteId);
+        return contratante != null ? contratante.PhoneNumber : "Representante no encontrado";
+    }
+
+    private string GetEstadoReservaName(int estadoReservaId)
+    {
+        var estado = EstadoReservas.FirstOrDefault(i => i.Id == estadoReservaId);
+        return estado != null ? estado.Estado : "Estadp no encontrado";
+    }
+}

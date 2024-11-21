@@ -301,6 +301,24 @@ namespace Orquesta.API.Migrations
                     b.ToTable("Contratantes");
                 });
 
+            modelBuilder.Entity("Orquesta.Shared.Entities.EstadoReserva", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EstadoReservas");
+                });
+
             modelBuilder.Entity("Orquesta.Shared.Entities.GeneroMusical", b =>
                 {
                     b.Property<int>("Id")
@@ -415,6 +433,9 @@ namespace Orquesta.API.Migrations
                     b.Property<int>("ContratanteId")
                         .HasColumnType("int");
 
+                    b.Property<int>("EstadoReservaId")
+                        .HasColumnType("int");
+
                     b.Property<DateOnly>("Fecha")
                         .HasColumnType("date");
 
@@ -434,6 +455,8 @@ namespace Orquesta.API.Migrations
                     b.HasIndex("AgrupacionId");
 
                     b.HasIndex("ContratanteId");
+
+                    b.HasIndex("EstadoReservaId");
 
                     b.ToTable("Reservaciones");
                 });
@@ -679,9 +702,17 @@ namespace Orquesta.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Orquesta.Shared.Entities.EstadoReserva", "EstadoReserva")
+                        .WithMany("Reservaciones")
+                        .HasForeignKey("EstadoReservaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Agrupacion");
 
                     b.Navigation("Contratante");
+
+                    b.Navigation("EstadoReserva");
                 });
 
             modelBuilder.Entity("Orquesta.Shared.Entities.Agrupacion", b =>
@@ -699,6 +730,11 @@ namespace Orquesta.API.Migrations
 
                     b.Navigation("Calificaciones_Contratante");
 
+                    b.Navigation("Reservaciones");
+                });
+
+            modelBuilder.Entity("Orquesta.Shared.Entities.EstadoReserva", b =>
+                {
                     b.Navigation("Reservaciones");
                 });
 

@@ -1,20 +1,20 @@
-﻿@page "/agrupacion/create"
+﻿@page "/crearAgrupacion/{Id:int}"
 @using CurrieTechnologies.Razor.SweetAlert2
 @inject IRepository repository
 @inject NavigationManager navigationManager
 @inject SweetAlertService sweetAlertService
 
-<h3>Crear</h3>
-
-<AgrupacionSolistaForm @ref="agrupacionSolistaForm" Agrupacion="agrupacion" OnSubmit="Create" ReturnAction="Return" />
+<CrearAgrupacionForm @ref="crearAgrupacionForm" Agrupacion="agrupacion" OnSubmit="Create" ReturnAction="Return" />
 
 @code {
     private Agrupacion agrupacion = new Agrupacion();
-    private AgrupacionSolistaForm agrupacionSolistaForm;
+    private CrearAgrupacionForm crearAgrupacionForm;
+    [Parameter]
+    public int Id { get; set; }
 
     private async Task Create()
     {
-
+        agrupacion.RepresentanteId = Id;
         var responseHttp = await repository.PostAsync("/api/agrupacion", agrupacion);
 
         if (responseHttp.Error)
@@ -42,8 +42,8 @@
 
     private void Return()
     {
-        agrupacionSolistaForm!.FormPostedSuccessfully = true;
-        navigationManager.NavigateTo("/");
+        crearAgrupacionForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/agrupacion");
     }
 
 

@@ -78,6 +78,9 @@ namespace Orquesta.API.Data
 
                 _context.Contratantes.Add(new Contratante { Name = "Kevin", Email = "kevin@gmail.com", Document = "1231321", PhoneNumber = "3104827932" });
                 _context.Contratantes.Add(new Contratante { Name = "Sara", Email = "sara@gmail.com", Document = "431231231", PhoneNumber = "3122446060" });
+                _context.EstadoReservas.Add(new EstadoReserva { Estado = "En proceso" });
+                _context.EstadoReservas.Add(new EstadoReserva { Estado = "Completada" });
+                _context.EstadoReservas.Add(new EstadoReserva { Estado = "Cancelada" });
 
             }
 

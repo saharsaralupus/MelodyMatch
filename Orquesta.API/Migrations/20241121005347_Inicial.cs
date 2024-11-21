@@ -72,6 +72,19 @@ namespace Orquesta.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EstadoReservas",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Estado = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EstadoReservas", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "GeneroMusicales",
                 columns: table => new
                 {
@@ -361,6 +374,7 @@ namespace Orquesta.API.Migrations
                     FinalTime = table.Column<TimeSpan>(type: "time", nullable: false),
                     Fecha = table.Column<DateOnly>(type: "date", nullable: false),
                     Place = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    EstadoReservaId = table.Column<int>(type: "int", nullable: false),
                     ContratanteId = table.Column<int>(type: "int", nullable: false),
                     AgrupacionId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -377,6 +391,12 @@ namespace Orquesta.API.Migrations
                         name: "FK_Reservaciones_Contratantes_ContratanteId",
                         column: x => x.ContratanteId,
                         principalTable: "Contratantes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Reservaciones_EstadoReservas_EstadoReservaId",
+                        column: x => x.EstadoReservaId,
+                        principalTable: "EstadoReservas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -474,6 +494,11 @@ namespace Orquesta.API.Migrations
                 name: "IX_Reservaciones_ContratanteId",
                 table: "Reservaciones",
                 column: "ContratanteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reservaciones_EstadoReservaId",
+                table: "Reservaciones",
+                column: "EstadoReservaId");
         }
 
         /// <inheritdoc />
@@ -526,6 +551,9 @@ namespace Orquesta.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Contratantes");
+
+            migrationBuilder.DropTable(
+                name: "EstadoReservas");
 
             migrationBuilder.DropTable(
                 name: "Representantes");

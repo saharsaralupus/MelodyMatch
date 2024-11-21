@@ -54,7 +54,8 @@
     private string startTimeString;
     private string finalTimeString;
     private string Documento;
-    public List<Contratante> Contratantes { get; set; } = new List<Contratante>();
+    private List<Contratante> Contratantes { get; set; } = new List<Contratante>();
+    private Contratante contratante;
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; } = null!;
@@ -79,25 +80,12 @@
         var user = authenticationState.User;
         Documento = user.FindFirst(c => c.Type == "Document")?.Value;
         editContext = new EditContext(Reservacion);
-        var responseRepresentante = await repository.GetAsync<List<Contratante>>("api/contratante");
-        if (!responseRepresentante.Error)
+        var responseContratante = await repository.GetAsync<List<Contratante>>("api/contratante");
+        if (!responseContratante.Error)
         {
-            Contratantes = responseRepresentante.Response;
+            Contratantes = responseContratante.Response;
         }
-    }
-
-    private int GetContratanteId(string documento)
-    {
-        var contratante = Contratantes.FirstOrDefault(c => c.Document == documento);
-
-        if (contratante != null)
-        {
-            Reservacion.ContratanteId = contratante.Id;
-            return contratante.Id;
-        }
-
-        Reservacion.ContratanteId = 0; // Asegúrate de resetearlo si no se encuentra
-        return 0;
+        contratante = Contratantes.FirstOrDefault(i => i.Document == Documento);
     }
 
     private async Task HandleValidSubmit()
@@ -107,12 +95,8 @@
         {
             Reservacion.StartTime = startTime;
             Reservacion.FinalTime = finalTime;
-            var contratanteId = GetContratanteId(Documento);
-            if (contratanteId == 0)
-            {
-                await swal.FireAsync("Error", "No se encontró un contratante con el documento ingresado.", SweetAlertIcon.Error);
-                return;
-            }
+            Reservacion.EstadoReservaId = 1;
+            Reservacion.ContratanteId = contratante.Id;
             await OnSubmit.InvokeAsync(null);
         }
         else

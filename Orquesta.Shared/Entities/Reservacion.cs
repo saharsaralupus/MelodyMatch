@@ -31,7 +31,11 @@ namespace Orquesta.Shared.Entities
         [Required(ErrorMessage = "El campo {0} es obligatorio")]
         public string Place { get; set; }
 
-		[JsonIgnore]
+        [JsonIgnore]
+        public EstadoReserva EstadoReserva { get; set; }
+        public int EstadoReservaId { get; set; }
+
+        [JsonIgnore]
 		public Contratante Contratante { get; set; }
         public int ContratanteId { get; set; }
 

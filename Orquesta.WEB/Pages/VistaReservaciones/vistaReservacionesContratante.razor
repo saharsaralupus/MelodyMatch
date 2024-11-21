@@ -1,4 +1,4 @@
-﻿@page "/vistaReservacionContratante/{Id:int}"
+﻿@page "/reservacionesContratante/{Id:int}"
 @using Orquesta.Shared.Entities
 @using Orquesta.WEB.Repositories
 @using Orquesta.WEB.Shared
@@ -47,11 +47,12 @@
                                     }
                                 </p>
                                 <p><strong>Lugar:</strong> @item.Place</p>
+                                <p><strong>Estado:</strong> @GetEstadoReservaName(item.EstadoReservaId)</p>
                             </div>
                         </div>
                     </div>
                 }
-             }
+            }
 
         </div>
 
@@ -70,6 +71,7 @@
     public List<Reservacion> ReservacionesEspecifica { get; set; } // Declarada como propiedad pública
     public List<Agrupacion> Agrupaciones { get; set; }
     public List<Representante> Representantes { get; set; }
+    public List<EstadoReserva> EstadoReservas { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,14 +80,17 @@
 
     private async Task LoadAsync()
     {
-        var responseHttp = await repository.GetAsync<List<Reservacion>>("/api/reservacion");
-        if (responseHttp.Error)
+
+        var responseEstadoReserva = await repository.GetAsync<List<EstadoReserva>>("/api/estadoReserva");
+        if (!responseEstadoReserva.Error)
         {
-            var message = await responseHttp.GetErrorMessageAsync();
-            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
-            return;
+            EstadoReservas = responseEstadoReserva.Response;
         }
-        Reservaciones = responseHttp.Response;
+        var responseHttp = await repository.GetAsync<List<Reservacion>>("/api/reservacion");
+        if (!responseHttp.Error)
+        {
+            Reservaciones = responseHttp.Response;
+        }
 
         var responseRepresentantes = await repository.GetAsync<List<Representante>>("/api/representante");
         if (!responseRepresentantes.Error)
@@ -125,5 +130,11 @@
         var agrupacion = Agrupaciones.FirstOrDefault(i => i.Id == reserva?.AgrupacionId);
         var representante = Representantes.FirstOrDefault(i => i.Id == agrupacion?.RepresentanteId);
         return representante != null ? representante.PhoneNumber : "Representante no encontrado";
+    }
+
+    private string GetEstadoReservaName(int estadoReservaId)
+    {
+        var estado = EstadoReservas.FirstOrDefault(i => i.Id == estadoReservaId);
+        return estado != null ? estado.Estado : "Estadp no encontrado";
     }
 }
