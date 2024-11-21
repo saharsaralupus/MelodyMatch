@@ -1,0 +1,62 @@
+﻿@page "/calificacion_agrupacion/create"
+@using CurrieTechnologies.Razor.SweetAlert2
+@inject NavigationManager navigationManager
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+
+<Calificacion_AgrupacionForm @ref="calificacion_AgrupacionForm" Calificacion_Agrupacion="calificacion_Agrupacion" OnSubmit="Create" ReturnAction="Return" />
+
+@code {
+    private Calificacion_Agrupacion calificacion_Agrupacion = new Calificacion_Agrupacion();
+    private Calificacion_AgrupacionForm calificacion_AgrupacionForm;
+
+
+
+    private async Task Create()
+    {
+
+
+        var responseHttp = await repository.PostAsync("/api/calificacion_agrupacion", calificacion_Agrupacion);
+        if (responseHttp.Error)
+        {
+
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+
+
+        }
+
+        Return();
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+
+                Toast = true,
+                Position = SweetAlertPosition.BottomEnd,
+                ShowConfirmButton = true,
+                Timer = 3000
+
+
+            });
+
+
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Registro creado con éxito");
+    }
+
+
+    private void Return()
+    {
+
+
+
+
+        calificacion_AgrupacionForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/calificacion_agrupacion");
+
+
+
+
+    }
+
+
+}
