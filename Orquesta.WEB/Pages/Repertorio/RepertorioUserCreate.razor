@@ -3,7 +3,19 @@
 @inject NavigationManager navigationManager
 @inject SweetAlertService sweetAlertService
 
-<h3>Repertorio</h3>
+
+<style>
+    .titulo{       
+        font-size: 1.75rem;
+        margin-left: 20px;
+        margin-top: 20px;
+    }
+</style>
+
+<div class="titulo">
+    <h3>CANCIÓN</h3>
+</div>
+
 
 <RepertorioUserForm @ref="repertorioUserForm" Repertorio="repertorio" OnSubmit="Create" ReturnAction="Return" />
 

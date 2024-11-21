@@ -12,8 +12,8 @@ using Orquesta.API.Data;
 namespace Orquesta.API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241121005347_Inicial")]
-    partial class Inicial
+    [Migration("20241121021559_primero")]
+    partial class primero
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

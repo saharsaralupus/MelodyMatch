@@ -5,7 +5,18 @@
 @inject SweetAlertService sweetAlertService
 @inject AuthenticationStateProvider authenticationStateProvider
 
-<h3>Crear</h3>
+
+<style>
+    .titulo {
+        font-size: 1.75rem;
+        margin-left: 20px;
+        margin-top: 20px;
+    }
+</style>
+
+<div class="titulo">
+    <h3>Crear</h3>
+</div>
 <ProcesoReservacionForm @ref="procesoReservacionForm" Reservacion="reservacion" OnSubmit="Create" ReturnAction="Return" />
 
 @code {

@@ -27,8 +27,4 @@
 		<ProjectReference Include="..\Orquesta.WEB\Orquesta.WEB.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Migrations\" />
-	</ItemGroup>
-
 </Project>

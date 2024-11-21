@@ -17,11 +17,58 @@
     border-radius: 8px; /* Borde redondeado */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
     }
+
+    .profile-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    }
+
+    .profile-pic {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    }
+
+    .profile-text h2 {
+    font-size: 1.5em;
+    margin-bottom: 5px;
+    }
+
+    .titulo{
+    align-content:center;
+    margin-left:40%;
+    margin-right: 40%;
+    }
+
+    .reservaciones-list {
+    width: 100%;
+    }
+
+    .contenedor1{
+    display: flex;
+    gap: 135px;
+    }
+
+    .contenedor2 {
+    display: flex;
+    gap: 30px;
+    }
+
+    .perfil{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    }
+
 </style>
 
 <GenericList MyList="Reservaciones">
     <Body>
-        <h2>RESERVACIONES</h2>
+        <div class="titulo"><h3>RESERVACIONES</h3></div>
+
         <div class="reservaciones-list">
             @if (ReservacionesEspecifica != null)
             {
@@ -30,24 +77,42 @@
                     <div class="profile-content">
                         <div class="profile-info">
                             <div class="profile-text">
-                                <img class="profile-pic" src="https://localhost:7000/@GetUserPhoto(item.ContratanteId)" alt="Foto del contratante">
-                                <h2 class="genre">@GetContratanteName(item.Id)</h2>
-                                <h3>WHATSAPP: @GetContratantePhone(item.Id) </h3>
-                                <p><strong>Hora:</strong> @item.StartTime</p>
-                                <p><strong>Fecha:</strong> @item.Fecha.ToString("dd/MM/yyyy")</p>
-                                <p>
-                                    <strong>Duración:</strong>
-                                    @if (item.FinalTime > item.StartTime)
-                                    {
-                                        var duracion = item.FinalTime - item.StartTime;
-                                        <span>@($"{duracion.Hours} horas y {duracion.Minutes} minutos")</span>
-                                    }
-                                    else
-                                    {
-                                        <span>La hora final debe ser mayor que la hora de inicio.</span>
-                                    }
-                                </p>
-                                <p><strong>Lugar:</strong> @item.Place</p>
+                                <div class="perfil">
+                                    <img class="profile-pic" src="https://localhost:7000/@GetUserPhoto(item.ContratanteId)" alt="Foto del contratante">
+                                    <div class="profile-text">
+                                        <h2 class="genre">@GetContratanteName(item.Id)</h2>
+                                        <p>Whatsapp: @GetContratantePhone(item.Id) </p>
+                                        <a href="perfilContratante/@item.ContratanteId" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i> Ver Perfil</a>
+
+                                        @if (item.Fecha < FechaActual)
+                                        {
+                                            <a href="nombrePagina/@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i> Calificar experiencia</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="nombrePagina/@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i> Cancelar</a>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="contenedor1">
+                                    <p><strong>Hora:</strong> @item.StartTime</p>
+                                    <p><strong>Fecha:</strong> @item.Fecha.ToString("dd/MM/yyyy")</p>
+                                </div>
+                                <div class="contenedor2">
+                                    <p>
+                                        <strong>Duración:</strong>
+                                        @if (item.FinalTime > item.StartTime)
+                                        {
+                                            var duracion = item.FinalTime - item.StartTime;
+                                            <span>@($"{duracion.Hours} horas y {duracion.Minutes} minutos")</span>
+                                        }
+                                        else
+                                        {
+                                            <span>La hora final debe ser mayor que la hora de inicio.</span>
+                                        }
+                                    </p>
+                                    <p><strong>Lugar:</strong> @item.Place</p>                                  
+                                </div>
                                 <p><strong>Estado:</strong> @GetEstadoReservaName(item.EstadoReservaId)</p>
                             </div>
                         </div>
@@ -77,6 +142,8 @@
     public List<Contratante> Contratantes { get; set; }
     public List<EstadoReserva> EstadoReservas { get; set; }
     public List<User> Users { get; set; }
+
+    public DateOnly FechaActual = DateOnly.FromDateTime(DateTime.Now);
 
     protected override async Task OnInitializedAsync()
     {

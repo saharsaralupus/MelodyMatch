@@ -6,25 +6,44 @@
 <EditForm EditContext="editContext" OnValidSubmit="OnSubmit">
 	<DataAnnotationsValidator />
 
-	<div class="mb-3">
-		<label>Nombre</label>
-		<div>
-			<InputText class="form-control" @bind-Value="Repertorio.Name" />
-			<ValidationMessage For="@(()=>Repertorio.Name)" />
+	<style>
+		.mb-3 {
+			margin-bottom: 1rem !important;
+			margin-left: 20px;
+		}
+
+		.card-body {
+			flex: 1 1 auto;
+			padding: 1rem 1rem;
+			padding: 1rem 1rem;
+			margin-bottom: 120px;
+		}
+
+	</style>
+
+	<div class="card-body">
+		<div class="mb-3">
+			<label>Nombre</label>
+			<div>
+				<InputText  @bind-Value="Repertorio.Name" />
+				<ValidationMessage For="@(()=>Repertorio.Name)" />
+			</div>
+		</div>
+
+		<div class="mb-3">
+			<label> Versión </label>
+			<div>
+				<InputText  @bind-Value="Repertorio.Version" />
+				<ValidationMessage For="@(()=>Repertorio.Version)" />
+			</div>
+		</div>
+
+		<div class="mb-3">
+			<button class="btn btn-primary" type="submit">Guardar</button>
+			<button class="btn btn-info" type="reset">Limpiar</button>
+			<button class="btn btn-success" @onclick="ReturnAction">Regresar</button>
 		</div>
 	</div>
-
-	<div class="mb-3">
-		<label> Versión </label>
-		<div>
-			<InputText class="form-control" @bind-Value="Repertorio.Version" />
-			<ValidationMessage For="@(()=>Repertorio.Version)" />
-		</div>
-	</div>
-
-	<button class="btn btn-primary" type="submit">Guardar</button>
-	<button class="btn btn-info" type="reset">Limpiar</button>
-	<button class="btn btn-success" @onclick="ReturnAction">Regresar</button>
 
 </EditForm>
 
