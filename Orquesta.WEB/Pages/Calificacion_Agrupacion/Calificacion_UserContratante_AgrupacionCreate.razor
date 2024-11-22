@@ -1,4 +1,4 @@
-﻿@page "/procesoReservacion/create/{Id:int}"
+﻿@page "/calificarAgrupacion/create/{Id:int}"
 @inject IRepository repository
 @inject NavigationManager navigationManager
 @inject SweetAlertService sweetAlertService
@@ -16,20 +16,20 @@
 <div class="titulo">
     <h3>Crear</h3>
 </div>
-<ProcesoReservacionForm @ref="procesoReservacionForm" Reservacion="reservacion" OnSubmit="Create" ReturnAction="Return" />
+<Calificacion_User_AgrupacionForm @ref="calificacion_User_AgrupacionForm" Calificacion_Agrupacion="calificacion_Agrupacion" OnSubmit="Create" ReturnAction="Return" />
 
 @code {
-    private Reservacion reservacion = new Reservacion();
-    private ProcesoReservacionForm procesoReservacionForm;
+    private Calificacion_Agrupacion calificacion_Agrupacion = new Calificacion_Agrupacion();
+    private Calificacion_UserContratante_AgrupacionForm calificacion_UserContratante_AgrupacionForm;
     [Parameter]
     public int Id { get; set; }
 
 
     private async Task Create()
     {
-        reservacion.AgrupacionId = Id;
+        calificacion_Agrupacion.AgrupacionId = Id;
 
-        var responseHttp = await repository.PostAsync("/api/reservacion", reservacion);
+        var responseHttp = await repository.PostAsync("/api/calificacion_agrupacion", calificacion_Agrupacion);
         if (responseHttp.Error)
         {
             var message = await responseHttp.GetErrorMessageAsync();
@@ -51,7 +51,7 @@
 
     private void Return()
     {
-        procesoReservacionForm!.FormPostedSuccessfully = true;
+        calificacion_User_AgrupacionForm!.FormPostedSuccessfully = true;
         navigationManager.NavigateTo("/");
     }
 }

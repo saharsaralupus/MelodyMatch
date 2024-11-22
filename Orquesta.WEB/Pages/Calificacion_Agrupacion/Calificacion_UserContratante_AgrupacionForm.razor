@@ -1,0 +1,111 @@
+﻿@using Orquesta.Shared.Entities
+@using System.ComponentModel.DataAnnotations
+@inject SweetAlertService swal
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+
+<NavigationLock OnBeforeInternalNavigation="OnBeforeInternalNavigation"></NavigationLock>
+
+<EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
+	<DataAnnotationsValidator />
+
+	<div class="mb-3">
+		<label>Estrellas (1 a 5)</label>
+		<div>
+			<InputNumber class="form-control" @bind-Value="Calificacion_Agrupacion.Puntaje" />
+			<ValidationMessage For="@(() => Calificacion_Agrupacion.Puntaje)" />
+		</div>
+	</div>
+
+	<div class="mb-3">
+		<label>Comentario</label>
+		<div>
+			<InputText @bind-Value="Calificacion_Agrupacion.Comentario" />
+			<ValidationMessage For="@(() => Calificacion_Agrupacion.Comentario)" />
+		</div>
+	</div>
+	<button class="btn btn-primary" type="submit">Guardar</button>
+	<button class="btn btn-info" type="reset">Limpiar</button>
+	<button class="btn btn-success" @onclick="ReturnAction">Regresar</button>
+
+</EditForm>
+
+@code {
+
+	private EditContext editContext;
+	private string Documento;
+	private List<Contratante> Contratantes { get; set; } = new List<Contratante>();
+	private Contratante contratante;
+
+	[CascadingParameter]
+	private Task<AuthenticationState> authenticationStateTask { get; set; } = null!;
+
+	[EditorRequired]
+	[Parameter]
+	public Calificacion_Agrupacion Calificacion_Agrupacion { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authenticationState = await authenticationStateTask;
+		var user = authenticationState.User;
+		Documento = user.FindFirst(c => c.Type == "Document")?.Value;
+		editContext = new EditContext(contratante);
+		var responseContratante = await repository.GetAsync<List<Contratante>>("api/contratante");
+		if (!responseContratante.Error)
+		{
+			Contratantes = responseContratante.Response;
+		}
+		contratante = Contratantes.FirstOrDefault(i => i.Document == Documento);
+	}
+
+	[EditorRequired]
+	[Parameter]
+
+	public EventCallback OnSubmit { get; set; }
+
+	[EditorRequired]
+	[Parameter]
+	public EventCallback ReturnAction { get; set; }
+
+	public bool FormPostedSuccessfully { get; set; } = false;
+
+	private async Task HandleValidSubmit()
+	{
+		Calificacion_Agrupacion.ContratanteId = contratante.Id;
+			await OnSubmit.InvokeAsync(null);
+	}
+
+	private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+	{
+		var formularioFueEditado = editContext.IsModified();
+
+		if (!formularioFueEditado)
+		{
+			return;
+		}
+
+		if (FormPostedSuccessfully)
+		{
+			return;
+		}
+
+		var resultado = await swal.FireAsync(new SweetAlertOptions
+			{
+				Title = "Confirmación",
+				Text = "¿Deseas abandonar la página y perder los cambios?",
+				Icon = SweetAlertIcon.Warning,
+				ShowCancelButton = true
+			});
+
+		var confirmado = !string.IsNullOrEmpty(resultado.Value);
+
+		if (confirmado)
+		{
+			return;
+		}
+
+		context.PreventNavigation();
+	}
+
+}
