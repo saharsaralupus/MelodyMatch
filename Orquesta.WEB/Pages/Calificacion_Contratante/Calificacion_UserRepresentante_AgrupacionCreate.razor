@@ -1,0 +1,57 @@
+﻿@page "/calificarContratante/create/{Id:int}"
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+@inject AuthenticationStateProvider authenticationStateProvider
+
+
+<style>
+    .titulo {
+        font-size: 1.75rem;
+        margin-left: 20px;
+        margin-top: 20px;
+    }
+</style>
+
+<div class="titulo">
+    <h3>Crear</h3>
+</div>
+<Calificacion_UserRepresentante_AgrupacionForm @ref="calificacion_UserRepresentante_AgrupacionForm" Calificacion_Contratante="calificacion_Contratante" OnSubmit="Create" ReturnAction="Return" />
+
+@code {
+    private Calificacion_Contratante calificacion_Contratante = new Calificacion_Contratante();
+    private Calificacion_UserRepresentante_AgrupacionForm calificacion_UserRepresentante_AgrupacionForm;
+    [Parameter]
+    public int Id { get; set; }
+
+
+    private async Task Create()
+    {
+        calificacion_Contratante.ContratanteId = Id;
+
+        var responseHttp = await repository.PostAsync("/api/calificacion_contratante", calificacion_Contratante);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+        }
+
+        Return();
+
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+                Toast = true,
+                Position = SweetAlertPosition.BottomEnd,
+                ShowConfirmButton = true,
+                Timer = 3000
+            });
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Registro creado con éxito");
+    }
+
+    private void Return()
+    {
+        calificacion_UserRepresentante_AgrupacionForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/");
+    }
+}
