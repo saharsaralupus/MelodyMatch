@@ -33,7 +33,7 @@
 
 @code {
 
-	private EditContext editContext;
+	public EditContext editContext;
 	private string Documento;
 	private List<Contratante> Contratantes { get; set; } = new List<Contratante>();
 	private Contratante contratante;
@@ -61,7 +61,6 @@
 
 	[EditorRequired]
 	[Parameter]
-
 	public EventCallback OnSubmit { get; set; }
 
 	[EditorRequired]

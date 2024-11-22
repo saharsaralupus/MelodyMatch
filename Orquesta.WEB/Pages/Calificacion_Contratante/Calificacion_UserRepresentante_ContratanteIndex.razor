@@ -1,0 +1,105 @@
+﻿@page "/historialCalificacionesRepresentante/{Id:int}"
+@using CurrieTechnologies.Razor.SweetAlert2
+@using Orquesta.Shared.Entities
+@using Orquesta.WEB.Repositories
+@using Orquesta.WEB.Shared
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+
+
+<div class="card">
+    <div class="card-header">
+        <span>
+            <i class="bi bi-person" /> Historial de calificaciones a contratantes
+        </span>
+    </div>
+
+    <div class="card-body">
+
+        <GenericList MyList="calificacion_ContratantesEspecificos">
+
+            <Body>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+
+                                <b>Nombre Contratante</b>
+                                <td><b>Puntaje</b></td>
+                                <td><b>Comentario</b></td>
+
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in calificacion_ContratantesEspecificos!)
+                        {
+                            <tr>
+                                <td>@GetContratanteName(item.ContratanteId)</td>
+                                <td>@item.Puntaje</td>
+                                <td>@item.Comentario </td>
+
+                                <td>
+                                    <a href="/historialCalificacionesRepresentante/edit/@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square" /> Editar</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </Body>
+        </GenericList>
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public List<Calificacion_Contratante> calificacion_Contratantes { get; set; }
+    public List<Representante> representantes { get; set; }
+    public List<Contratante> contratantes { get; set; }
+    public List<Calificacion_Contratante> calificacion_ContratantesEspecificos { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.GetAsync<List<Calificacion_Contratante>>("/api/calificacion_contratante");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+        calificacion_Contratantes = responseHttp.Response;
+        var responseContratante = await repository.GetAsync<List<Contratante>>("/api/contratante");
+        if (responseContratante.Error)
+        {
+            var message = await responseContratante.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+        contratantes = responseContratante.Response;
+        var responseRepresentantes = await repository.GetAsync<List<Representante>>("/api/representante");
+        if (responseRepresentantes.Error)
+        {
+            var message = await responseRepresentantes.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+        representantes = responseRepresentantes.Response;
+        calificacion_ContratantesEspecificos = calificacion_Contratantes.Where(i => i.RepresentanteId == Id).ToList();
+    }
+
+    private string GetContratanteName(int contratanteId)
+    {
+        var contratante = contratantes.FirstOrDefault(i => i.Id == contratanteId);
+        return contratante != null ? contratante.Name : "Agrupación no encontrada";
+    }
+}

@@ -1,0 +1,70 @@
+﻿@page "/historialCalificacionesContratante/edit/{Id:int}"
+@using System.Net
+@using CurrieTechnologies.Razor.SweetAlert2
+@inject NavigationManager navigationManager
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+
+<h3>Editar</h3>
+
+@if (calificacion_Agrupacion is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <Calificacion_UserContratante_AgrupacionForm 
+    @ref="calificacion_UserContratante_AgrupacionForm" 
+    Calificacion_Agrupacion="calificacion_Agrupacion" 
+    OnSubmit="Editar" 
+    ReturnAction="Return" />
+
+
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Calificacion_Agrupacion calificacion_Agrupacion = new Calificacion_Agrupacion();
+    private Calificacion_UserContratante_AgrupacionForm calificacion_UserContratante_AgrupacionForm;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var responseHttp = await repository.GetAsync<Calificacion_Agrupacion>($"api/calificacion_agrupacion/{Id}");
+        if (!responseHttp.Error)
+        {
+            calificacion_Agrupacion = responseHttp.Response;
+            calificacion_UserContratante_AgrupacionForm!.editContext = new EditContext(calificacion_Agrupacion);
+        }
+    }
+
+
+
+    private async Task Editar()
+    {
+        var responseHttp = await repository.PutAsync("/api/calificacion_agrupacion", calificacion_Agrupacion);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+    await sweetAlertService.FireAsync("Error", message);
+            return;
+        }
+
+    Return();
+    var toast = sweetAlertService.Mixin(new SweetAlertOptions
+    {
+        Toast = true,
+        Position = SweetAlertPosition.BottomEnd,
+        ShowConfirmButton = true,
+        Timer = 3000
+    });
+    await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Cambios guardados con éxito.");
+}
+
+        private void Return()
+        {
+        calificacion_UserContratante_AgrupacionForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/");
+        }
+   
+}

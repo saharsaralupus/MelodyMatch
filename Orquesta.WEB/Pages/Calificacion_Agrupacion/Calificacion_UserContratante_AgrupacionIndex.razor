@@ -1,0 +1,96 @@
+﻿@page "/historialCalificacionesContratante/{Id:int}"
+@using CurrieTechnologies.Razor.SweetAlert2
+@using Orquesta.Shared.Entities
+@using Orquesta.WEB.Repositories
+@using Orquesta.WEB.Shared
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+
+
+<div class="card">
+    <div class="card-header">
+        <span>
+            <i class="bi bi-person" /> Historial de calificaciones a agrupaciones
+        </span>
+    </div>
+
+    <div class="card-body">
+
+        <GenericList MyList="calificacion_AgrupacionsEspecificas">
+
+            <Body>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+
+                                <b>Nombre Agrupación</b>
+                                <td><b>Puntaje</b></td>
+                                <td><b>Comentario</b></td>
+
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in calificacion_AgrupacionsEspecificas!)
+                        {
+                            <tr>
+                                <td>@GetAgrupacionName(item.AgrupacionId)</td>
+                                <td>@item.Puntaje</td>
+                                <td>@item.Comentario </td>
+
+                                <td>
+                                    <a href="/historialCalificacionesContratante/edit/@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square" /> Editar</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </Body>
+        </GenericList>
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public List<Calificacion_Agrupacion> calificacion_Agrupacions { get; set; }
+    public List<Agrupacion> agrupaciones { get; set; }
+    public List<Calificacion_Agrupacion> calificacion_AgrupacionsEspecificas { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        var responseHttp = await repository.GetAsync<List<Calificacion_Agrupacion>>("/api/calificacion_agrupacion");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+        calificacion_Agrupacions = responseHttp.Response;
+        var responseAgrupaciones = await repository.GetAsync<List<Agrupacion>>("/api/agrupacion");
+        if (responseAgrupaciones.Error)
+        {
+            var message = await responseAgrupaciones.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+        agrupaciones = responseAgrupaciones.Response;
+        calificacion_AgrupacionsEspecificas = calificacion_Agrupacions.Where(i => i.ContratanteId == Id).ToList();
+    }
+
+    private string GetAgrupacionName(int AgrupacionId)
+    {
+        var agrupacion = agrupaciones.FirstOrDefault(i => i.Id == AgrupacionId);
+        return agrupacion != null ? agrupacion.Name : "Agrupación no encontrada";
+    }
+}

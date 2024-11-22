@@ -16,11 +16,11 @@
 <div class="titulo">
     <h3>Crear</h3>
 </div>
-<Calificacion_UserRepresentante_AgrupacionForm @ref="calificacion_UserRepresentante_AgrupacionForm" Calificacion_Contratante="calificacion_Contratante" OnSubmit="Create" ReturnAction="Return" />
+<Calificacion_UserRepresentante_ContratanteForm @ref="calificacion_UserRepresentante_ContratanteForm" Calificacion_Contratante="calificacion_Contratante" OnSubmit="Create" ReturnAction="Return" />
 
 @code {
     private Calificacion_Contratante calificacion_Contratante = new Calificacion_Contratante();
-    private Calificacion_UserRepresentante_AgrupacionForm calificacion_UserRepresentante_AgrupacionForm;
+    private Calificacion_UserRepresentante_ContratanteForm calificacion_UserRepresentante_ContratanteForm;
     [Parameter]
     public int Id { get; set; }
 
@@ -51,7 +51,7 @@
 
     private void Return()
     {
-        calificacion_UserRepresentante_AgrupacionForm!.FormPostedSuccessfully = true;
+        calificacion_UserRepresentante_ContratanteForm!.FormPostedSuccessfully = true;
         navigationManager.NavigateTo("/");
     }
 }
