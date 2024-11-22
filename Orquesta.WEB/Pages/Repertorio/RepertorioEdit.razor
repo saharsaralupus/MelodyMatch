@@ -4,8 +4,74 @@
 @inject NavigationManager navigationManager
 @inject IRepository repository
 @inject SweetAlertService sweetAlertService
-<h3>RepertorioEdit</h3>
 
-@code {
+<h3>Editar</h3>
+
+@if (repertorio is null)
+{
+    <p>Cargando...</p>
+}
+else
+{
+    <RepertorioForm @ref="repertorioForm" Repertorio="repertorio" OnSubmit="Editar" ReturnAction="Return" />
 
 }
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Repertorio repertorio;
+    private RepertorioForm repertorioForm;
+    
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var responseHttp = await repository.GetAsync<Repertorio>($"/api/repertorio/{Id}");
+        if (responseHttp.Error)
+        {
+            if (responseHttp.HttpResponseMessage.StatusCode == HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/repertorio");
+            }
+            else
+            {
+                var messsage = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", messsage, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            repertorio = responseHttp.Response;
+        }
+    }
+
+
+    private async Task Editar()
+    {
+        var responseHttp = await repository.PutAsync("/api/repertorio", repertorio);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+        }
+
+        Return();
+        var toast = sweetAlertService.Mixin(new SweetAlertOptions
+            {
+                Toast = true,
+                Position = SweetAlertPosition.BottomEnd,
+                ShowConfirmButton = true,
+                Timer = 3000
+            });
+        await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Cambios guardados con éxito.");
+    }
+
+    private void Return()
+    {
+        repertorioForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/repertorio");
+    }
+
+}
+

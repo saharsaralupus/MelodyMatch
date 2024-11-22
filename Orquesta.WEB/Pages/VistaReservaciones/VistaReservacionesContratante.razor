@@ -7,6 +7,7 @@
 @inject NavigationManager navigationManager
 
 
+
 <style>
     .profile-content {
         padding: 20px;
@@ -118,7 +119,7 @@
                                 }
                                 else
                                 {
-                                    <a href="nombrePagina/@item.Id" class="btn btn-sm btn-cancelar"><i class="bi bi-x-circle"></i> Cancelar</a>
+                                    <a @onclick="() => CancelarReserva(item.Id)" class="btn btn-sm btn-cancelar"><i class="bi bi-x-circle"></i> Cancelar</a>
                                 }
                             </div>
                         </div>
@@ -165,72 +166,6 @@
 
     </Body>
 </GenericList>  
-
-@* 
-
-<GenericList MyList="Reservaciones">
-    <Body>
-        <div class="titulo"><h3>RESERVACIONES</h3></div>
-
-        <div class="reservaciones-list">
-            @if (ReservacionesEspecifica != null)
-            {
-                @foreach (var item in ReservacionesEspecifica)
-                {
-                    <div class="profile-content">
-                        <div class="profile-info">
-                            <div class="perfil">
-                                <img class="profile-pic" src="https://localhost:7000/@GetUserPhoto(item.AgrupacionId)" alt="Foto del contratante">
-                                <div>
-                                    <h2 class="genre">@GetAgrupacionName(item.Id)</h2>
-                                    <p>Whatsapp: @GetRepresentantePhone(item.Id)</p>
-                                </div>
-                            </div>
-                            <div class="button-group">
-                                <a href="perfilContratante/@item.ContratanteId" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i> Ver Perfil</a>
-
-                                @if (item.Fecha < FechaActual)
-                                {
-                                    <a href="calificarAgrupacion/create/@item.AgrupacionId" class="btn btn-sm btn-calificar"><i class="bi bi-pencil-square"></i> Calificar experiencia</a>
-                                }
-                                else
-                                {
-                                    <a href="nombrePagina/@item.Id" class="btn btn-sm btn-cancelar"><i class="bi bi-pencil-square"></i> Cancelar</a>
-                                }
-                            </div>
-                        </div>
-
-                        <!-- Detalles en dos columnas -->
-                        <div class="details-grid">
-                            <p><strong>Hora:</strong> @item.StartTime</p>
-                            <p><strong>Fecha:</strong> @item.Fecha.ToString("dd/MM/yyyy")</p>
-                            <p>
-                                <strong>Duración:</strong>
-                                @if (item.FinalTime > item.StartTime)
-                                {
-                                    var duracion = item.FinalTime - item.StartTime;
-                                    <span>@($"{duracion.Hours} horas y {duracion.Minutes} minutos")</span>
-                                }
-                                else
-                                {
-                                    <span>La hora final debe ser mayor que la hora de inicio.</span>
-                                }
-                            </p>
-                            <p><strong>Lugar:</strong> @item.Place</p>
-                            <p><strong>Estado:</strong> @GetEstadoReservaName(item.EstadoReservaId)</p>
-                        </div>
-                    </div>
-                }
-            }
-            else
-            {
-                <span>No hay reservaciones en este momento</span>
-            }
-        </div>
-    </Body>
-</GenericList>
-
- *@
 
 @code {
     [Parameter]
@@ -296,6 +231,24 @@
                 .ToList(); // Asignar la lista filtrada
         }
     }
+
+    private async Task CancelarReserva(int reservacionId)
+    {
+        var response = await repository.PutAsync<object>($"/api/reservacion/cambiarEstado/{reservacionId}", null);
+
+            if (!response.Error)
+            {
+                var toast = sweetAlertService.Mixin(new SweetAlertOptions
+                    {
+                        Toast = true,
+                        Position = SweetAlertPosition.BottomEnd,
+                        ShowConfirmButton = true,
+                        Timer = 3000
+                    });
+                await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Reservación cancelada con éxito.");
+            navigationManager.NavigateTo($"/reservacionesContratante/{Id}", forceLoad: true);
+            }
+        }
 
     private string GetAgrupacionName(int ReservacionId)
     {

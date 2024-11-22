@@ -120,7 +120,8 @@
                                 }   
                                 else
                                 {
-                                    <a href="nombrePagina/@item.Id" class="btn btn-sm btn-cancelar"><i class="bi bi-pencil-square"></i> Cancelar</a>
+                                    <a @onclick="() => CancelarReserva(item.Id)" class="btn btn-sm btn-cancelar"><i class="bi bi-x-circle"></i> Cancelar</a>
+
                                 }
                             </div>
                         </div>
@@ -233,6 +234,24 @@
         }
         agrupacion = Agrupaciones.FirstOrDefault(i => i.RepresentanteId == representante.Id);
         ReservacionesEspecifica = Reservaciones.Where(i => i.AgrupacionId == agrupacion.Id).ToList();
+    }
+
+    private async Task CancelarReserva(int reservacionId)
+    {
+        var response = await repository.PutAsync<object>($"/api/reservacion/cambiarEstado/{reservacionId}", null);
+
+        if (!response.Error)
+        {
+            var toast = sweetAlertService.Mixin(new SweetAlertOptions
+                {
+                    Toast = true,
+                    Position = SweetAlertPosition.BottomEnd,
+                    ShowConfirmButton = true,
+                    Timer = 3000
+                });
+            await toast.FireAsync(icon: SweetAlertIcon.Success, message: "Reservación cancelada con éxito.");
+            navigationManager.NavigateTo($"/reservacionesRepresentante/{Id}", forceLoad: true);
+        }
     }
 
     private string GetContratanteName(int ReservacionId)

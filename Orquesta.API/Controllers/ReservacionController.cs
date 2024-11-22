@@ -76,5 +76,23 @@ namespace Orquesta.API.Controllers
             return NoContent();
         }
 
+        [HttpPut("cambiarEstado/{id:int}")]
+        public async Task<ActionResult> CambiarEstadoReserva(int id)
+        {
+            var reservacion = await _context.Reservaciones.FirstOrDefaultAsync(r => r.Id == id);
+            if (reservacion == null)
+            {
+                return NotFound("Reserva no encontrada.");
+            }
+
+            reservacion.EstadoReservaId = 3;
+            _context.Update(reservacion);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
+
     }
 }
