@@ -50,7 +50,7 @@
 		var authenticationState = await authenticationStateTask;
 		var user = authenticationState.User;
 		Documento = user.FindFirst(c => c.Type == "Document")?.Value;
-		editContext = new EditContext(contratante);
+		editContext = new EditContext(Calificacion_Agrupacion);
 		var responseContratante = await repository.GetAsync<List<Contratante>>("api/contratante");
 		if (!responseContratante.Error)
 		{

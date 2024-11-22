@@ -16,7 +16,7 @@
 <div class="titulo">
     <h3>Crear</h3>
 </div>
-<Calificacion_User_AgrupacionForm @ref="calificacion_User_AgrupacionForm" Calificacion_Agrupacion="calificacion_Agrupacion" OnSubmit="Create" ReturnAction="Return" />
+<Calificacion_UserContratante_AgrupacionForm @ref="calificacion_UserContratante_AgrupacionForm" Calificacion_Agrupacion="calificacion_Agrupacion" OnSubmit="Create" ReturnAction="Return" />
 
 @code {
     private Calificacion_Agrupacion calificacion_Agrupacion = new Calificacion_Agrupacion();
@@ -51,7 +51,7 @@
 
     private void Return()
     {
-        calificacion_User_AgrupacionForm!.FormPostedSuccessfully = true;
+        calificacion_UserContratante_AgrupacionForm!.FormPostedSuccessfully = true;
         navigationManager.NavigateTo("/");
     }
 }
