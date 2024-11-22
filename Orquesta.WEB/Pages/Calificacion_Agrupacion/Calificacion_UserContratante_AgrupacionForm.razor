@@ -10,6 +10,18 @@
 <EditForm EditContext="editContext" OnValidSubmit="HandleValidSubmit">
 	<DataAnnotationsValidator />
 
+	<style>
+		.mb-3 {
+			margin-bottom: 1rem !important;
+			margin-left: 20px;
+			margin-right: 20px;
+		}
+
+		.espacio {
+			margin-bottom: 160px;
+		}
+	</style>
+
 	<div class="mb-3">
 		<label>Estrellas (1 a 5)</label>
 		<div>
@@ -25,9 +37,13 @@
 			<ValidationMessage For="@(() => Calificacion_Agrupacion.Comentario)" />
 		</div>
 	</div>
-	<button class="btn btn-primary" type="submit">Guardar</button>
-	<button class="btn btn-info" type="reset">Limpiar</button>
-	<button class="btn btn-success" @onclick="ReturnAction">Regresar</button>
+	<div class="mb-3">
+		<button class="btn btn-primary" type="submit">Guardar</button>
+		<button class="btn btn-info" type="reset">Limpiar</button>
+		<button class="btn btn-success" @onclick="ReturnAction">Regresar</button>
+	</div>
+
+	<div class="espacio"></div>
 
 </EditForm>
 

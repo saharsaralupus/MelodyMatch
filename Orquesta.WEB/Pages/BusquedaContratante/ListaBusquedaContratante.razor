@@ -136,17 +136,20 @@
                         <div class="content-inline">
                             <div class="search-inline">
                                 <i class="bi bi-search search-icon"></i>
-                                <input name="txtSearch" class="search-inline--input" placeholder="Buscar">
+                                <input name="txtSearch"
+                                       class="search-inline--input"
+                                       placeholder="Buscar"
+                                       @bind="searchQuery"
+                                       @bind:event="oninput" />
                             </div>
                         </div>
-                        <!-- Imagen -->
                         <img class="profile-pic" src="https://images.unsplash.com/photo-1527606432722-8b1422ce77a1?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="OrquesYa">
                     </div>
                 </Authorized>
             </AuthorizeView>
         </div>
         <div class="agrupaciones-list">
-            @foreach (var item in Agrupaciones!)
+            @foreach (var item in FilteredAgrupaciones)
             {
                 <div class="profile-content">
                     <div class="profile-info">
@@ -170,6 +173,14 @@
     public List<GeneroMusical> GeneroMusicals { get; set; }
     public List<User> Users { get; set; }
     public List<Representante> Representantes { get; set; }
+
+    private string searchQuery = string.Empty;
+
+    private IEnumerable<Agrupacion> FilteredAgrupaciones =>
+    Agrupaciones?.Where(a =>
+        string.IsNullOrWhiteSpace(searchQuery) ||
+        a.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+        GetGeneroMusicalName(a.Id).Contains(searchQuery, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnInitializedAsync()
     {
