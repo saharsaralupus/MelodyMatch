@@ -139,9 +139,20 @@
                                     <span>La hora final debe ser mayor que la hora de inicio.</span>
                                 }
                             </p>
+
                             <p><strong>Lugar:</strong> @item.Place</p>
                         </div>
-                        <p><strong>Estado:</strong> @GetEstadoReservaName(item.EstadoReservaId)</p>
+                        @if (item.Fecha < FechaActual)
+                        {
+
+                            <p><strong>Estado:</strong> Completada!</p>
+                        }
+                        else
+                        {
+                            <p><strong>Estado:</strong> @GetEstadoReservaName(item.EstadoReservaId)</p>
+                        }
+
+                       
                     </div>
                 }
             }

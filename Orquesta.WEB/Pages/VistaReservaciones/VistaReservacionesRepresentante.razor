@@ -116,11 +116,11 @@
 
                                 @if (item.Fecha < FechaActual)
                                 {
-                                    <a href="calificarContratante/create/@item.ContratanteId" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i> Calificar experiencia</a>
+                                    <a href="calificarContratante/create/@item.ContratanteId" class="btn btn-sm btn-calificar"><i class="bi bi-pencil-square"></i> Calificar experiencia</a>
                                 }   
                                 else
                                 {
-                                    <a href="nombrePagina/@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i> Cancelar</a>
+                                    <a href="nombrePagina/@item.Id" class="btn btn-sm btn-cancelar"><i class="bi bi-pencil-square"></i> Cancelar</a>
                                 }
                             </div>
                         </div>
@@ -143,7 +143,16 @@
                             </p>
                             <p><strong>Lugar:</strong> @item.Place</p>
                         </div>
-                        <p><strong>Estado:</strong> @GetEstadoReservaName(item.EstadoReservaId)</p>
+                        @if (item.Fecha < FechaActual)
+                        {
+
+                            <p><strong>Estado:</strong> Completada!</p>
+                        }
+                        else
+                        {
+                            <p><strong>Estado:</strong> @GetEstadoReservaName(item.EstadoReservaId)</p>
+                        }
+                            
                     </div>
                 }
             } else {

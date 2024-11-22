@@ -215,13 +215,11 @@ else
     private async Task LoadAsync()
     {
         var responseHttp = await repository.GetAsync<List<Agrupacion_Genero>>("/api/agrupacionGenero");
-        if (responseHttp.Error)
+        if (!responseHttp.Error)
         {
-            var message = await responseHttp.GetErrorMessageAsync();
-            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
-            return;
+            AgrupacionGeneros = responseHttp.Response;
         }
-        AgrupacionGeneros = responseHttp.Response;
+        
 
         var responseGenero = await repository.GetAsync<List<GeneroMusical>>("/api/generoMusical");
         if (!responseGenero.Error)
