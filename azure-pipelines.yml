@@ -1,0 +1,146 @@
+# ==============================================================================
+# Archivo YAML de CI/CD en Microsoft Azure DevOps - Proyecto MelodyMatch
+# Asignatura: Arquitectura de Software II (ITM) - Guia de Trabajo No. 5
+# Validaciones de Seguridad: OWASP Dependency-Check (CVSS >= 7) y Gitleaks
+# Despliegue Continuo (CD): Azure App Services (melodymatch-itm-app)
+# ==============================================================================
+
+trigger:
+  branches:
+    include:
+      - main
+      - Integration
+      - Develop
+
+pr:
+  branches:
+    include:
+      - main
+      - Integration
+      - Develop
+
+pool:
+  vmImage: 'ubuntu-22.04'
+
+variables:
+  JAVA_VERSION: '1.17'
+  MIN_COVERAGE_PERCENT: 80
+  OWASP_FAIL_CVSS: 7
+  AZURE_SUBSCRIPTION: 'Azure-ITM-MelodyMatch-Connection'
+  AZURE_WEBAPP_NAME: 'melodymatch-itm-app'
+
+stages:
+  # ----------------------------------------------------------------------------
+  # ETAPA 1: Escaneo de Secretos Expuestos con Gitleaks (Falla si detecta fugas)
+  # ----------------------------------------------------------------------------
+  - stage: Gitleaks_Secret_Scanning
+    displayName: '1. Seguridad: Deteccion de Secretos Expuestos (Gitleaks)'
+    jobs:
+      - job: GitleaksJob
+        displayName: 'Escaneo Automatico de Credenciales y Llaves (Gitleaks)'
+        steps:
+          - checkout: self
+            fetchDepth: 0
+          - script: |
+              mkdir -p target/gitleaks
+              curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz \
+                | tar -xz -C /tmp gitleaks
+              echo "Ejecutando Gitleaks sobre el repositorio MelodyMatch..."
+              /tmp/gitleaks detect --source . --verbose --exit-code 1 \
+                --report-format json --report-path target/gitleaks/gitleaks-report.json
+            displayName: 'Ejecutar Gitleaks (--exit-code 1 bloqueante)'
+          - task: PublishPipelineArtifact@1
+            condition: always()
+            displayName: 'Publicar Reporte Gitleaks'
+            inputs:
+              targetPath: 'target/gitleaks'
+              artifact: 'Gitleaks_Secret_Scan_Report'
+
+  # ----------------------------------------------------------------------------
+  # ETAPA 2: Analisis de Vulnerabilidades en Dependencias (OWASP Dependency-Check)
+  # ----------------------------------------------------------------------------
+  - stage: OWASP_Dependency_Check
+    displayName: '2. Seguridad: Vulnerabilidades en Dependencias (OWASP Dependency-Check)'
+    dependsOn: Gitleaks_Secret_Scanning
+    condition: succeeded()
+    jobs:
+      - job: OWASPJob
+        displayName: 'Auditoria SCA OWASP Dependency-Check (CVSS >= 7.0 Bloqueante)'
+        steps:
+          - script: |
+              mkdir -p target/dependency-check-report
+              echo "Ejecutando OWASP Dependency-Check sobre dependencias Maven de MelodyMatch..."
+              mvn -B org.owasp:dependency-check-maven:check \
+                -DfailBuildOnCVSS=$(OWASP_FAIL_CVSS) \
+                -Dnoupdate=true \
+                -Dformats=HTML,JSON \
+                -DoutputDirectory=target/dependency-check-report
+            displayName: 'Ejecutar OWASP Dependency-Check (failBuildOnCVSS=7)'
+          - task: PublishPipelineArtifact@1
+            condition: always()
+            displayName: 'Publicar Reporte OWASP Dependency-Check'
+            inputs:
+              targetPath: 'target/dependency-check-report'
+              artifact: 'OWASP_Dependency_Check_Report'
+
+  # ----------------------------------------------------------------------------
+  # ETAPA 3: Integracion Continua (Compilacion, JUnit 5 y Cobertura JaCoCo >= 80%)
+  # ----------------------------------------------------------------------------
+  - stage: Build_And_Unit_Tests
+    displayName: '3. CI: Compilacion, Pruebas Unitarias JUnit 5 y Cobertura JaCoCo'
+    dependsOn: OWASP_Dependency_Check
+    condition: succeeded()
+    jobs:
+      - job: BuildAndTestJob
+        displayName: 'Compilar Paquete JAR y Validar Umbral JaCoCo (>= 80%)'
+        steps:
+          - task: Maven@4
+            displayName: 'Maven Clean Verify + JaCoCo Coverage Gate (>= 80%)'
+            inputs:
+              mavenPomFile: 'pom.xml'
+              goals: 'clean package verify jacoco:check'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '$(JAVA_VERSION)'
+              publishJUnitResults: true
+              testResultsFiles: '**/surefire-reports/TEST-*.xml'
+              codeCoverageToolOption: 'JaCoCo'
+          - task: CopyFiles@2
+            displayName: 'Preparar Artefacto JAR para Despliegue en App Service'
+            inputs:
+              SourceFolder: '$(System.DefaultWorkingDirectory)/target'
+              Contents: '*.jar'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)'
+          - task: PublishPipelineArtifact@1
+            displayName: 'Publicar Artefacto de Despliegue (melodymatch-jar)'
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)'
+              artifact: 'melodymatch-drop'
+
+  # ----------------------------------------------------------------------------
+  # ETAPA 4: Despliegue Continuo (CD) en Microsoft Azure App Services
+  # ----------------------------------------------------------------------------
+  - stage: Deploy_Azure_App_Service
+    displayName: '4. CD: Despliegue Automatico en Azure App Services'
+    dependsOn:
+      - Gitleaks_Secret_Scanning
+      - OWASP_Dependency_Check
+      - Build_And_Unit_Tests
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployToAzureAppService
+        displayName: 'Desplegar MelodyMatch en Azure App Service (Linux Java 17)'
+        environment: 'MelodyMatch-Production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: 'melodymatch-drop'
+                - task: AzureWebApp@1
+                  displayName: 'Azure App Service Deploy: melodymatch-itm-app'
+                  inputs:
+                    azureSubscription: '$(AZURE_SUBSCRIPTION)'
+                    appType: 'webAppLinux'
+                    appName: '$(AZURE_WEBAPP_NAME)'
+                    package: '$(Pipeline.Workspace)/melodymatch-drop/*.jar'
+                    runtimeStack: 'JAVA|17-java17'
